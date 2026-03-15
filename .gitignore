@@ -1,0 +1,17 @@
+# Build output
+bin/
+obj/
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+
+# IDE
+.vs/
+.vscode/
+*.user
+
+# .NET
+*.suo
+.DS_Store
