@@ -1,0 +1,548 @@
+@page
+@model InvoiceApp.Web.Pages.Invoices.PreviewModel
+@{
+    ViewData["Title"] = "Invoice Preview";
+    Layout = null;
+    var companyName = Model.Company?.Name ?? "Your Company";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@Model.Invoice!.InvoiceNumber</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet" />
+    <style>
+        body {
+            background: #e9ecef;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        .invoice-wrap {
+            max-width: 780px;
+            margin: 24px auto 40px;
+            background: #fff;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.13);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Stamp */
+        .invoice-stamp {
+            position: absolute;
+            bottom: 80px;
+            right: 28px;
+            width: 130px;
+            height: 130px;
+            transform: rotate(-12deg);
+            opacity: 0.82;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        @@media print {
+            .invoice-stamp { opacity: 0.75; }
+        }
+
+        .invoice-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Top Header Bar */
+        .invoice-header {
+            background: #1a1a2e;
+            color: #fff;
+            padding: 24px 32px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .invoice-header .company-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            line-height: 1.2;
+        }
+
+        .invoice-header .invoice-label {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: 4px;
+            color: #e8c84a;
+            text-align: right;
+            line-height: 1;
+        }
+
+        .invoice-header .invoice-meta {
+            text-align: right;
+            font-size: 0.85rem;
+            color: #ccc;
+            margin-top: 4px;
+        }
+
+        /* Accent stripe */
+        .accent-bar {
+            height: 5px;
+            background: linear-gradient(90deg, #e8c84a 0%, #1a1a2e 100%);
+        }
+
+        /* Address section */
+        .address-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        /* Left - From (Company) */
+        .address-from {
+            padding: 22px 28px;
+            background: #fff;
+            border-left: 5px solid #e8c84a;
+        }
+
+        /* Right - Bill To (Client) */
+        .address-billto {
+            padding: 22px 28px;
+            background: #1a1a2e;
+            text-align: left;
+        }
+
+        .address-label {
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+
+        .address-from .address-label {
+            color: #e8c84a;
+        }
+
+        .address-billto .address-label {
+            color: #e8c84a;
+        }
+
+        .address-name {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 3px;
+        }
+
+        .address-from .address-name {
+            color: #1a1a2e;
+        }
+
+        .address-billto .address-name {
+            color: #fff;
+        }
+
+        .address-line {
+            font-size: 0.84rem;
+            line-height: 1.7;
+        }
+
+        .address-from .address-line {
+            color: #555;
+        }
+
+        .address-billto .address-line {
+            color: #b0b8cc;
+        }
+
+        /* Line items table */
+        .items-section {
+            padding: 0 32px 24px;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 0.88rem;
+        }
+
+        .items-table thead tr {
+            background: #1a1a2e;
+            color: #fff;
+        }
+
+        .items-table thead th {
+            padding: 10px 12px;
+            font-weight: 600;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .items-table tbody tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .items-table tbody tr:hover {
+            background: #fff8e1;
+        }
+
+        .items-table tbody td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #eee;
+            vertical-align: top;
+        }
+
+        .item-desc {
+            font-weight: 600;
+            color: #222;
+        }
+
+        .item-detail {
+            font-size: 0.78rem;
+            color: #888;
+            margin-top: 2px;
+        }
+
+        /* Totals rows */
+        .total-row td {
+            padding: 7px 12px;
+            border: none;
+            font-size: 0.88rem;
+        }
+
+        .total-row.subtotal td { color: #555; }
+        .total-row.vat-row td { color: #555; }
+        .total-row.retention-row td { color: #c0392b; }
+
+        .grand-total {
+            background: #1a1a2e !important;
+            color: #fff !important;
+        }
+
+        .grand-total td {
+            padding: 13px 12px !important;
+            font-size: 1rem !important;
+            font-weight: 700 !important;
+            color: #fff !important;
+        }
+
+        .grand-total .amount {
+            color: #e8c84a !important;
+            font-size: 1.1rem !important;
+        }
+
+        /* Notes */
+        .notes-section {
+            margin: 0 32px 20px;
+            background: #fffbea;
+            border-left: 4px solid #e8c84a;
+            padding: 10px 14px;
+            font-size: 0.85rem;
+            color: #555;
+            border-radius: 0 4px 4px 0;
+        }
+
+        /* Banking Details */
+        .banking-section {
+            margin: 0 32px 32px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 16px 20px;
+        }
+
+        .banking-title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #888;
+            margin-bottom: 10px;
+        }
+
+        .banking-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px 20px;
+            font-size: 0.85rem;
+        }
+
+        .banking-item span:first-child {
+            color: #888;
+            font-size: 0.78rem;
+        }
+
+        .banking-item span:last-child {
+            font-weight: 600;
+            color: #222;
+        }
+
+        /* Footer */
+        .invoice-footer {
+            background: #1a1a2e;
+            color: #aaa;
+            text-align: center;
+            padding: 10px;
+            font-size: 0.75rem;
+        }
+
+        /* Print */
+        @@media print {
+            body { background: white; }
+            .invoice-wrap { box-shadow: none; margin: 0; border-radius: 0; }
+            .no-print { display: none !important; }
+        }
+
+        /* Mobile */
+        @@media (max-width: 600px) {
+            .invoice-wrap { margin: 0; border-radius: 0; }
+            .invoice-header { padding: 16px 16px 14px; flex-direction: column; gap: 8px; }
+            .invoice-header .invoice-label { text-align: left; font-size: 1.5rem; }
+            .address-section { grid-template-columns: 1fr; }
+            .address-from { border-bottom: 2px solid #e0e0e0; padding: 16px; }
+            .address-billto { padding: 16px; }
+            .items-section { padding: 0 12px 16px; }
+            .items-table thead th:nth-child(2),
+            .items-table thead th:nth-child(3),
+            .items-table tbody td:nth-child(2),
+            .items-table tbody td:nth-child(3) { display: none; }
+            .banking-section { margin: 0 12px 20px; }
+            .banking-grid { grid-template-columns: 1fr; }
+            .notes-section { margin: 0 12px 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Toolbar -->
+<div class="no-print bg-dark p-2 d-flex gap-2 justify-content-center sticky-top">
+    <a href="/Invoices/History" class="btn btn-sm btn-outline-light">
+        <i class="bi bi-arrow-left"></i> Back
+    </a>
+    <button onclick="window.print()" class="btn btn-sm btn-outline-light">
+        <i class="bi bi-printer"></i> Print
+    </button>
+    <a href="/Invoices/DownloadPdf?id=@Model.Invoice!.Id" class="btn btn-sm btn-warning fw-semibold">
+        <i class="bi bi-download"></i> Download PDF
+    </a>
+</div>
+
+<div class="invoice-wrap">
+<div class="invoice-content">
+
+    <!-- Header -->
+    <div class="invoice-header">
+        <div>
+            <div class="company-name">@(Model.Company?.Name ?? "Your Company")</div>
+            @if (!string.IsNullOrEmpty(Model.Company?.Phone))
+            {
+                <div style="color:#ccc;font-size:0.82rem;margin-top:4px">
+                    <i class="bi bi-telephone"></i> @Model.Company.Phone
+                </div>
+            }
+        </div>
+        <div>
+            <div class="invoice-label">INVOICE</div>
+            <div class="invoice-meta">
+                <div>No: <strong style="color:#fff">@Model.Invoice.InvoiceNumber</strong></div>
+                <div>Date: @Model.Invoice.InvoiceDate.ToString("dd MMM yyyy")</div>
+                @if (Model.Invoice.IsReissue && Model.Invoice.ReissueDate.HasValue)
+                {
+                    <div>Re-issued: @Model.Invoice.ReissueDate.Value.ToString("dd MMM yyyy")</div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Accent Bar -->
+    <div class="accent-bar"></div>
+
+    <!-- Address Row: Company Left | Bill To Right -->
+    <div class="address-section">
+        <!-- LEFT: Company -->
+        <div class="address-from">
+            <div class="address-label">From</div>
+            @if (Model.Company != null)
+            {
+                <div class="address-name">@Model.Company.Name</div>
+                @if (!string.IsNullOrEmpty(Model.Company.AddressLine1))
+                {
+                    <div class="address-line">@Model.Company.AddressLine1</div>
+                }
+                @if (!string.IsNullOrEmpty(Model.Company.AddressLine2))
+                {
+                    <div class="address-line">@Model.Company.AddressLine2</div>
+                }
+                @if (!string.IsNullOrEmpty(Model.Company.City))
+                {
+                    <div class="address-line">@Model.Company.City @Model.Company.PostalCode</div>
+                }
+                @if (!string.IsNullOrEmpty(Model.Company.Phone))
+                {
+                    <div class="address-line" style="margin-top:6px">
+                        <i class="bi bi-telephone" style="font-size:0.75rem"></i> @Model.Company.Phone
+                    </div>
+                }
+            }
+        </div>
+        <!-- RIGHT: Bill To -->
+        <div class="address-billto">
+            <div class="address-label">Bill To</div>
+            <div class="address-name">@Model.Invoice.ClientName</div>
+            @if (!string.IsNullOrEmpty(Model.Invoice.ClientAddressLine1))
+            {
+                <div class="address-line">@Model.Invoice.ClientAddressLine1</div>
+            }
+            @if (!string.IsNullOrEmpty(Model.Invoice.ClientAddressLine2))
+            {
+                <div class="address-line">@Model.Invoice.ClientAddressLine2</div>
+            }
+            @if (!string.IsNullOrEmpty(Model.Invoice.ClientCity))
+            {
+                <div class="address-line">@Model.Invoice.ClientCity, @Model.Invoice.ClientPostalCode</div>
+            }
+        </div>
+    </div>
+
+    <!-- Line Items -->
+    <div class="items-section">
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th style="width:45%">Description</th>
+                    <th class="text-end" style="width:12%">Qty</th>
+                    <th style="width:10%">Unit</th>
+                    <th class="text-end" style="width:15%">Rate (R)</th>
+                    <th class="text-end" style="width:18%">Amount (R)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Invoice.LineItems)
+                {
+                    <tr>
+                        <td>
+                            <div class="item-desc">@item.Description</div>
+                        </td>
+                        <td class="text-end">@(item.Unit == "lump sum" ? "-" : item.Quantity.ToString("G"))</td>
+                        <td>@item.Unit</td>
+                        <td class="text-end">@(item.Unit == "lump sum" ? "-" : item.Rate.ToString("N2"))</td>
+                        <td class="text-end fw-semibold">@item.Amount.ToString("N2")</td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                @if (Model.Invoice.VATEnabled)
+                {
+                    <tr class="total-row subtotal">
+                        <td colspan="4" class="text-end">Subtotal</td>
+                        <td class="text-end">@Model.Invoice.SubTotal.ToString("N2")</td>
+                    </tr>
+                    <tr class="total-row vat-row">
+                        <td colspan="4" class="text-end">VAT (@Model.Invoice.VATRate%)</td>
+                        <td class="text-end">@Model.Invoice.VATAmount.ToString("N2")</td>
+                    </tr>
+                }
+                @if (Model.Invoice.RetentionEnabled)
+                {
+                    <tr class="total-row retention-row">
+                        <td colspan="4" class="text-end">@Model.Invoice.RetentionType (@Model.Invoice.RetentionPercentage%)</td>
+                        <td class="text-end">- @Model.Invoice.RetentionAmount.ToString("N2")</td>
+                    </tr>
+                }
+                <tr class="grand-total">
+                    <td colspan="4" class="text-end">TOTAL AMOUNT DUE</td>
+                    <td class="text-end amount">R @Model.Invoice.TotalAmount.ToString("N2")</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- Notes -->
+    @if (!string.IsNullOrEmpty(Model.Invoice.Notes))
+    {
+        <div class="notes-section">
+            <strong>Notes:</strong> @Model.Invoice.Notes
+        </div>
+    }
+
+    <!-- Banking Details -->
+    @if (Model.Banking != null && !string.IsNullOrEmpty(Model.Banking.BankName))
+    {
+        <div class="banking-section">
+            <div class="banking-title">Banking Details</div>
+            <div class="banking-grid">
+                <div class="banking-item">
+                    <span>Bank</span><br />
+                    <span>@Model.Banking.BankName</span>
+                </div>
+                @if (!string.IsNullOrEmpty(Model.Banking.AccountType))
+                {
+                    <div class="banking-item">
+                        <span>Account Type</span><br />
+                        <span>@Model.Banking.AccountType</span>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.Banking.AccountNumber))
+                {
+                    <div class="banking-item">
+                        <span>Account Number</span><br />
+                        <span>@Model.Banking.AccountNumber</span>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.Banking.BranchCode))
+                {
+                    <div class="banking-item">
+                        <span>Branch Code</span><br />
+                        <span>@Model.Banking.BranchCode</span>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- Footer -->
+    <div class="invoice-footer">
+        Thank you for your business &mdash; @(Model.Company?.Name ?? "") &mdash; @Model.Invoice.InvoiceNumber
+    </div>
+
+    <!-- Stamp - bottom right corner -->
+    <div class="invoice-stamp">
+        @{
+            var stampName = (Model.Company?.Name ?? "").ToUpperInvariant();
+            var invNum    = Model.Invoice.InvoiceNumber;
+        }
+        <svg viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg" width="130" height="130">
+            <defs>
+                <!-- Arc path for company name along top of circle -->
+                <path id="topArc" d="M 9,65 A 56,56 0 0,1 121,65" fill="none"/>
+            </defs>
+
+            <!-- Outer circle -->
+            <circle cx="65" cy="65" r="61" fill="none" stroke="#1a1a2e" stroke-width="3"/>
+            <!-- Inner circle -->
+            <circle cx="65" cy="65" r="52" fill="none" stroke="#1a1a2e" stroke-width="1.5"/>
+
+            <!-- Company name curved along top arc -->
+            <text font-size="9" font-weight="700" fill="#1a1a2e" letter-spacing="1.5">
+                <textPath href="#topArc" startOffset="50%" text-anchor="middle">@stampName</textPath>
+            </text>
+
+            <!-- Horizontal dividers -->
+            <line x1="24" y1="48" x2="106" y2="48" stroke="#1a1a2e" stroke-width="1"/>
+            <line x1="24" y1="86" x2="106" y2="86" stroke="#1a1a2e" stroke-width="1"/>
+
+            <!-- Centre text -->
+            <text x="65" y="67" text-anchor="middle" font-size="13" font-weight="900" fill="#1a1a2e" letter-spacing="1">ORIGINAL</text>
+            <text x="65" y="82" text-anchor="middle" font-size="11" font-weight="700" fill="#1a1a2e" letter-spacing="1">INVOICE</text>
+
+            <!-- Invoice number below bottom divider -->
+            <text x="65" y="103" text-anchor="middle" font-size="8.5" font-weight="600" fill="#1a1a2e" letter-spacing="1.5">@invNum</text>
+        </svg>
+    </div>
+
+</div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="InvoiceApp.Core/InvoiceApp.Core.csproj" />
+  <Project Path="InvoiceApp.Infrastructure/InvoiceApp.Infrastructure.csproj" />
+  <Project Path="InvoiceApp.Tests/InvoiceApp.Tests.csproj" />
+  <Project Path="InvoiceApp.Web/InvoiceApp.Web.csproj" />
+</Solution>

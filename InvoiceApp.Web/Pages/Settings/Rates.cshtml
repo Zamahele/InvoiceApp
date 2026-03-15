@@ -1,0 +1,71 @@
+@page
+@model InvoiceApp.Web.Pages.Settings.RatesModel
+@{
+    ViewData["Title"] = "Rate Library";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="fw-bold mb-0">Rate Library</h5>
+    <a href="/Settings" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Settings
+    </a>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header fw-semibold">Add New Rate</div>
+    <div class="card-body">
+        <form method="post" asp-page-handler="Add">
+            <div class="mb-2">
+                <input asp-for="NewRate.Description" class="form-control" placeholder="Description (e.g. Paving)" />
+            </div>
+            <div class="row g-2 mb-2">
+                <div class="col-6">
+                    <select asp-for="NewRate.Unit" class="form-select">
+                        <option value="">Unit</option>
+                        <option value="m2">m2</option>
+                        <option value="m">m (linear)</option>
+                        <option value="m3">m3</option>
+                        <option value="unit">unit</option>
+                        <option value="hours">hours</option>
+                        <option value="lump sum">lump sum</option>
+                        <option value="load">load</option>
+                        <option value="bag">bag</option>
+                    </select>
+                </div>
+                <div class="col-6">
+                    <input asp-for="NewRate.Rate" class="form-control" placeholder="Rate (R)" type="number" step="0.01" />
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-plus-circle"></i> Add Rate
+            </button>
+        </form>
+    </div>
+</div>
+
+@if (Model.Rates.Any())
+{
+    <div class="card">
+        <div class="card-header fw-semibold">Saved Rates</div>
+        <ul class="list-group list-group-flush">
+            @foreach (var rate in Model.Rates)
+            {
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="fw-semibold">@rate.Description</div>
+                        <small class="text-muted">R @(rate.Rate.ToString("N2")) / @rate.Unit</small>
+                    </div>
+                    <form method="post" asp-page-handler="Delete" asp-route-id="@rate.Id">
+                        <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this rate?')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </form>
+                </li>
+            }
+        </ul>
+    </div>
+}
+else
+{
+    <p class="text-muted text-center mt-3">No saved rates yet. Add your common rates above.</p>
+}

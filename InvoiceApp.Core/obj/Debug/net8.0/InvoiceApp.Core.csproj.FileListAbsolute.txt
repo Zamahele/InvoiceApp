@@ -1,0 +1,11 @@
+C:\Users\zamajasonn\InvoiceApp\InvoiceApp.Core\bin\Debug\net8.0\InvoiceApp.Core.deps.json
+C:\Users\zamajasonn\InvoiceApp\InvoiceApp.Core\bin\Debug\net8.0\InvoiceApp.Core.dll
+C:\Users\zamajasonn\InvoiceApp\InvoiceApp.Core\bin\Debug\net8.0\InvoiceApp.Core.pdb
+C:\Users\zamajasonn\InvoiceApp\InvoiceApp.Core\obj\Debug\net8.0\InvoiceApp.Core.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\zamajasonn\InvoiceApp\InvoiceApp.Core\obj\Debug\net8.0\InvoiceApp.Core.AssemblyInfoInputs.cache
+C:\Users\zamajasonn\InvoiceApp\InvoiceApp.Core\obj\Debug\net8.0\InvoiceApp.Core.AssemblyInfo.cs
+C:\Users\zamajasonn\InvoiceApp\InvoiceApp.Core\obj\Debug\net8.0\InvoiceApp.Core.csproj.CoreCompileInputs.cache
+C:\Users\zamajasonn\InvoiceApp\InvoiceApp.Core\obj\Debug\net8.0\InvoiceApp.Core.dll
+C:\Users\zamajasonn\InvoiceApp\InvoiceApp.Core\obj\Debug\net8.0\refint\InvoiceApp.Core.dll
+C:\Users\zamajasonn\InvoiceApp\InvoiceApp.Core\obj\Debug\net8.0\InvoiceApp.Core.pdb
+C:\Users\zamajasonn\InvoiceApp\InvoiceApp.Core\obj\Debug\net8.0\ref\InvoiceApp.Core.dll
