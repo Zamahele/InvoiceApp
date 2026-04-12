@@ -15,6 +15,8 @@ public class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasDefaultSchema("blacktech");
+
         modelBuilder.Entity<Invoice>()
             .HasMany(i => i.LineItems)
             .WithOne(l => l.Invoice)
@@ -24,7 +26,11 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Invoice>()
             .Property(i => i.SubTotal).HasColumnType("decimal(18,2)");
         modelBuilder.Entity<Invoice>()
+            .Property(i => i.VATRate).HasColumnType("decimal(5,2)");
+        modelBuilder.Entity<Invoice>()
             .Property(i => i.VATAmount).HasColumnType("decimal(18,2)");
+        modelBuilder.Entity<Invoice>()
+            .Property(i => i.RetentionPercentage).HasColumnType("decimal(5,2)");
         modelBuilder.Entity<Invoice>()
             .Property(i => i.RetentionAmount).HasColumnType("decimal(18,2)");
         modelBuilder.Entity<Invoice>()
