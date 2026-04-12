@@ -2,7 +2,7 @@ name: Build and Deploy InvoiceApp
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
   workflow_dispatch:
 
 jobs:
