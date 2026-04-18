@@ -1,0 +1,180 @@
+@page
+@model InvoiceApp.Web.Pages.Rent.IndexModel
+@{
+    ViewData["Title"] = "Rent Tracker";
+    var monthName = new DateTime(Model.Year, Model.Month, 1).ToString("MMMM yyyy");
+    var months = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.MonthNames
+        .Take(12).Select((name, i) => new { Index = i + 1, Name = name }).ToList();
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0"><i class="bi bi-house-door"></i> Rent Tracker</h4>
+    <a href="/Settings/Rooms" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-gear"></i> Manage Rooms
+    </a>
+</div>
+
+@* Month selector *@
+<form method="get" class="mb-4">
+    <div class="row g-2 align-items-end">
+        <div class="col-auto">
+            <label class="form-label mb-1 small">Month</label>
+            <select name="Month" class="form-select form-select-sm" style="width:auto">
+                @foreach (var m in months)
+                {
+                    <option value="@m.Index" selected="@(m.Index == Model.Month)">@m.Name</option>
+                }
+            </select>
+        </div>
+        <div class="col-auto">
+            <label class="form-label mb-1 small">Year</label>
+            <input type="number" name="Year" value="@Model.Year" class="form-control form-control-sm" style="width:90px" min="2020" max="2099" />
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary btn-sm">View</button>
+        </div>
+    </div>
+</form>
+
+@if (!Model.Payments.Any())
+{
+    <div class="text-center py-5 text-muted">
+        <i class="bi bi-house-x fs-1"></i>
+        <p class="mt-2">No rooms configured. <a href="/Settings/Rooms">Add rooms in Settings</a> to start tracking rent.</p>
+    </div>
+}
+else
+{
+    @* Summary bar *@
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card text-center border-0 bg-light">
+                <div class="card-body py-2">
+                    <div class="fs-4 fw-bold">@Model.TotalRooms</div>
+                    <div class="small text-muted">Total Rooms</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card text-center border-0 bg-success bg-opacity-10">
+                <div class="card-body py-2">
+                    <div class="fs-4 fw-bold text-success">@Model.PaidCount</div>
+                    <div class="small text-muted">Paid</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card text-center border-0 bg-danger bg-opacity-10">
+                <div class="card-body py-2">
+                    <div class="fs-4 fw-bold text-danger">@Model.OutstandingCount</div>
+                    <div class="small text-muted">Outstanding</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card text-center border-0 bg-primary bg-opacity-10">
+                <div class="card-body py-2">
+                    <div class="fs-4 fw-bold text-primary">R @Model.TotalCollected.ToString("N2")</div>
+                    <div class="small text-muted">Collected / R @Model.TotalDue.ToString("N2")</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header fw-semibold">
+            <i class="bi bi-calendar-month"></i> @monthName
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Room</th>
+                            <th>Tenant</th>
+                            <th>Phone</th>
+                            <th class="text-end">Amount Due</th>
+                            <th>Status</th>
+                            <th>Paid Date</th>
+                            <th>Notes</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var p in Model.Payments)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@p.Room.Name</td>
+                                <td>@p.Room.TenantName</td>
+                                <td>@p.Room.TenantPhone</td>
+                                <td class="text-end">R @p.AmountDue.ToString("N2")</td>
+                                <td>
+                                    @if (p.IsPaid)
+                                    {
+                                        <span class="badge bg-success"><i class="bi bi-check-circle"></i> Paid</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger"><i class="bi bi-clock"></i> Outstanding</span>
+                                    }
+                                </td>
+                                <td>@(p.PaidDate.HasValue ? p.PaidDate.Value.ToString("dd MMM yyyy") : "-")</td>
+                                <td class="text-muted small">@(p.Notes ?? "-")</td>
+                                <td class="text-end">
+                                    @if (!p.IsPaid)
+                                    {
+                                        <button class="btn btn-success btn-sm"
+                                                data-bs-toggle="collapse"
+                                                data-bs-target="#pay-@p.Id">
+                                            <i class="bi bi-cash-coin"></i> Mark Paid
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <form method="post" asp-page-handler="Undo" asp-route-id="@p.Id"
+                                              asp-route-month="@Model.Month" asp-route-year="@Model.Year">
+                                            <button type="submit" class="btn btn-outline-secondary btn-sm"
+                                                    onclick="return confirm('Undo payment for @p.Room.Name?')">
+                                                <i class="bi bi-arrow-counterclockwise"></i> Undo
+                                            </button>
+                                        </form>
+                                    }
+                                </td>
+                            </tr>
+                            @if (!p.IsPaid)
+                            {
+                                <tr class="collapse" id="pay-@p.Id">
+                                    <td colspan="8" class="bg-light">
+                                        <form method="post" asp-page-handler="MarkPaid" asp-route-id="@p.Id"
+                                              asp-route-month="@Model.Month" asp-route-year="@Model.Year"
+                                              class="row g-2 p-2 align-items-end">
+                                            <div class="col-12 col-md-3">
+                                                <label class="form-label small mb-1">Amount Paid (R)</label>
+                                                <input type="number" name="amountPaid" value="@p.AmountDue"
+                                                       class="form-control form-control-sm" step="0.01" min="0" required />
+                                            </div>
+                                            <div class="col-12 col-md-5">
+                                                <label class="form-label small mb-1">Notes (optional)</label>
+                                                <input type="text" name="notes" class="form-control form-control-sm"
+                                                       placeholder="e.g. Cash payment" />
+                                            </div>
+                                            <div class="col-12 col-md-4 d-flex gap-2">
+                                                <button type="submit" class="btn btn-success btn-sm">
+                                                    <i class="bi bi-check-lg"></i> Confirm
+                                                </button>
+                                                <button type="button" class="btn btn-outline-secondary btn-sm"
+                                                        data-bs-toggle="collapse" data-bs-target="#pay-@p.Id">
+                                                    Cancel
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}

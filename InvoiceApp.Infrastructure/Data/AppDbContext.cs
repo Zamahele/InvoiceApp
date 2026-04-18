@@ -12,10 +12,25 @@ public class AppDbContext : DbContext
     public DbSet<CompanySettings> CompanySettings => Set<CompanySettings>();
     public DbSet<BankingDetails> BankingDetails => Set<BankingDetails>();
     public DbSet<SavedRate> SavedRates => Set<SavedRate>();
+    public DbSet<Room> Rooms => Set<Room>();
+    public DbSet<RentPayment> RentPayments => Set<RentPayment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("blacktech");
+
+        modelBuilder.Entity<Room>()
+            .Property(r => r.RentAmount).HasColumnType("decimal(18,2)");
+
+        modelBuilder.Entity<RentPayment>(b =>
+        {
+            b.Property(p => p.AmountDue).HasColumnType("decimal(18,2)");
+            b.Property(p => p.AmountPaid).HasColumnType("decimal(18,2)");
+            b.HasOne(p => p.Room)
+             .WithMany(r => r.Payments)
+             .HasForeignKey(p => p.RoomId)
+             .OnDelete(DeleteBehavior.Cascade);
+        });
 
         modelBuilder.Entity<Invoice>()
             .HasMany(i => i.LineItems)
