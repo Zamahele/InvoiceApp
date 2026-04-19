@@ -11,6 +11,18 @@
     </a>
 </div>
 
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger py-2 mb-3">
+        <ul class="mb-0">
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@error.ErrorMessage</li>
+            }
+        </ul>
+    </div>
+}
+
 <div class="card mb-3">
     <div class="card-header fw-semibold">Add New Rate</div>
     <div class="card-body">

@@ -24,11 +24,26 @@ public class RatesModel : PageModel
 
     public async Task<IActionResult> OnPostAddAsync()
     {
-        if (!string.IsNullOrWhiteSpace(NewRate.Description))
+        NewRate.Description = NewRate.Description?.Trim() ?? string.Empty;
+        NewRate.Unit = NewRate.Unit?.Trim() ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(NewRate.Description))
+            ModelState.AddModelError("NewRate.Description", "Rate description is required.");
+
+        if (string.IsNullOrWhiteSpace(NewRate.Unit))
+            ModelState.AddModelError("NewRate.Unit", "Rate unit is required.");
+
+        if (NewRate.Rate < 0)
+            ModelState.AddModelError("NewRate.Rate", "Rate cannot be negative.");
+
+        if (!ModelState.IsValid)
         {
-            _db.SavedRates.Add(NewRate);
-            await _db.SaveChangesAsync();
+            Rates = await _db.SavedRates.OrderBy(r => r.Description).ToListAsync();
+            return Page();
         }
+
+        _db.SavedRates.Add(NewRate);
+        await _db.SaveChangesAsync();
         return RedirectToPage();
     }
 
