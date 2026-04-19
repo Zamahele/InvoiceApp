@@ -1,0 +1,376 @@
+@page
+@model InvoiceApp.Web.Pages.Rent.ReceiptPreviewModel
+@{
+    ViewData["Title"] = "Rent Receipt";
+    Layout = null;
+
+    var p = Model.Payment;
+    var rs = Model.RentSettings;
+    var banking = Model.Banking;
+    var monthName = new DateTime(p.Year, p.Month, 1).ToString("MMMM yyyy");
+    var receiptRef = $"RCP-{p.Year}{p.Month:D2}-{p.Room.Name.Replace(" ", "").ToUpperInvariant()[..Math.Min(4, p.Room.Name.Length)]}";
+    var paid = p.AmountPaid ?? p.AmountDue;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rent Receipt — @receiptRef</title>
+    <link rel="stylesheet" href="/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <style>
+        :root {
+            --navy: #1a1a2e;
+            --gold: #e8c84a;
+        }
+
+        body {
+            background: #e9ecef;
+            font-family: Arial, sans-serif;
+        }
+
+        /* ── PRINT TOOLBAR ── */
+        .print-toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--navy);
+            padding: 10px 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .print-toolbar .btn-gold {
+            background: var(--gold);
+            color: var(--navy);
+            font-weight: 700;
+            border: none;
+        }
+
+        /* ── RECEIPT CARD ── */
+        .receipt-wrap {
+            max-width: 800px;
+            margin: 24px auto 80px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* ── HEADER ── */
+        .receipt-header {
+            background: var(--navy);
+            color: #fff;
+            padding: 20px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .receipt-header .property-name { font-size: 1.2rem; font-weight: 700; }
+        .receipt-header .meta-label { color: #aaa; font-size: 0.75rem; }
+        .receipt-header .meta-value { color: #fff; font-size: 0.8rem; font-weight: 600; }
+        .receipt-title { color: var(--gold); font-size: 1.5rem; font-weight: 900; letter-spacing: 2px; }
+
+        .gold-bar { height: 5px; background: var(--gold); }
+
+        /* ── FROM / TO ROW ── */
+        .address-row { display: flex; }
+        .from-box {
+            flex: 1;
+            border-left: 5px solid var(--gold);
+            padding: 16px 20px;
+        }
+        .to-box {
+            flex: 1;
+            background: var(--navy);
+            padding: 16px 20px;
+            color: #fff;
+        }
+        .section-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--gold);
+            text-transform: uppercase;
+        }
+        .from-box .section-label { color: var(--gold); }
+
+        /* ── PAYMENT TABLE ── */
+        .items-section { padding: 20px 28px; }
+        .items-table { width: 100%; border-collapse: collapse; }
+        .items-table thead th {
+            background: var(--navy);
+            color: #fff;
+            font-size: 0.75rem;
+            padding: 8px 12px;
+        }
+        .items-table tbody td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #eee;
+            font-size: 0.85rem;
+        }
+        .total-row td {
+            background: var(--navy);
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.95rem;
+            padding: 10px 12px;
+            border: none;
+        }
+        .total-row td:last-child { color: var(--gold); }
+
+        /* ── NOTES ── */
+        .notes-section {
+            margin: 0 28px 16px;
+            border-left: 4px solid var(--gold);
+            background: #fffbea;
+            padding: 10px 14px;
+            font-size: 0.85rem;
+        }
+
+        /* ── BANKING ── */
+        .banking-section {
+            margin: 0 28px 24px;
+            background: #f8f9fa;
+            padding: 14px;
+            border-radius: 4px;
+        }
+        .banking-label { font-size: 0.65rem; color: #888; letter-spacing: 1.5px; text-transform: uppercase; }
+        .banking-value { font-size: 0.875rem; font-weight: 700; color: var(--navy); }
+
+        /* ── PAID STAMP ── */
+        .invoice-stamp {
+            position: absolute;
+            bottom: 80px;
+            right: 30px;
+            width: 120px;
+            height: 120px;
+            opacity: 0.2;
+            transform: rotate(-12deg);
+            pointer-events: none;
+        }
+
+        /* ── FOOTER BAR ── */
+        .receipt-footer {
+            background: var(--navy);
+            color: #aaa;
+            text-align: center;
+            padding: 8px;
+            font-size: 0.75rem;
+        }
+
+        .paid-confirm {
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--gold);
+            letter-spacing: 2px;
+            padding: 12px 28px 0;
+        }
+
+        /* ── PRINT STYLES ── */
+        @@media print {
+            body { background: white; }
+            .print-toolbar { display: none !important; }
+            .receipt-wrap {
+                box-shadow: none;
+                margin: 0;
+                border-radius: 0;
+                max-width: 100%;
+                overflow: visible;
+            }
+            .invoice-stamp { opacity: 0.15; bottom: 100px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Print toolbar -->
+    <div class="print-toolbar no-print">
+        <button onclick="window.print()" class="btn btn-gold">
+            <i class="bi bi-printer"></i> Print Receipt
+        </button>
+        <a href="/Rent/DownloadReceipt?paymentId=@p.Id" class="btn btn-warning">
+            <i class="bi bi-download"></i> Download PDF
+        </a>
+        <a href="/Rent" class="btn btn-outline-light btn-sm ms-auto">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
+    </div>
+
+    <div class="receipt-wrap">
+
+        <!-- STAMP -->
+        <svg class="invoice-stamp" viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <path id="topArc" d="M 9,65 A 56,56 0 0,1 121,65" fill="none"/>
+            </defs>
+            <circle cx="65" cy="65" r="61" fill="none" stroke="#1a1a2e" stroke-width="3"/>
+            <circle cx="65" cy="65" r="52" fill="none" stroke="#1a1a2e" stroke-width="1.5"/>
+            <text font-size="9" font-weight="700" fill="#1a1a2e" letter-spacing="1.5">
+                <textPath href="#topArc" startOffset="50%" text-anchor="middle">@((rs?.PropertyName ?? "").ToUpperInvariant())</textPath>
+            </text>
+            <line x1="24" y1="48" x2="106" y2="48" stroke="#1a1a2e" stroke-width="1"/>
+            <line x1="24" y1="86" x2="106" y2="86" stroke="#1a1a2e" stroke-width="1"/>
+            <text x="65" y="65" text-anchor="middle" font-size="11" font-weight="900" fill="#1a1a2e" letter-spacing="1">RENT</text>
+            <text x="65" y="80" text-anchor="middle" font-size="11" font-weight="700" fill="#1a1a2e" letter-spacing="1">RECEIPT</text>
+            <text x="65" y="103" text-anchor="middle" font-size="7" font-weight="600" fill="#1a1a2e" letter-spacing="1">@receiptRef</text>
+        </svg>
+
+        <!-- HEADER -->
+        <div class="receipt-header">
+            <div>
+                <div class="property-name">@(rs?.PropertyName ?? "Property")</div>
+                @if (!string.IsNullOrEmpty(rs?.AgentName))
+                {
+                    <div style="color:#ccc;font-size:0.8rem;margin-top:4px">Agent: @rs.AgentName</div>
+                }
+                @if (!string.IsNullOrEmpty(rs?.AgentPhone))
+                {
+                    <div style="color:#ccc;font-size:0.75rem">@rs.AgentPhone</div>
+                }
+            </div>
+            <div style="text-align:right">
+                <div class="receipt-title">RENT RECEIPT</div>
+                <div style="margin-top:4px">
+                    <span class="meta-label">Ref: </span><span class="meta-value">@receiptRef</span>
+                </div>
+                <div>
+                    <span class="meta-label">Period: </span><span class="meta-value">@monthName</span>
+                </div>
+                @if (p.PaidDate.HasValue)
+                {
+                    <div>
+                        <span class="meta-label">Paid: </span>
+                        <span class="meta-value">@p.PaidDate.Value.ToString("dd MMM yyyy")</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="gold-bar"></div>
+
+        <!-- FROM / TO -->
+        <div class="address-row">
+            <div class="from-box">
+                <div class="section-label">From</div>
+                <div style="font-size:1rem;font-weight:700;color:var(--navy);margin-top:6px">
+                    @(rs?.PropertyName ?? "Property")
+                </div>
+                @if (!string.IsNullOrEmpty(rs?.AgentName))
+                {
+                    <div style="font-size:0.85rem;color:#555;margin-top:2px">Agent: @rs.AgentName</div>
+                }
+                @if (!string.IsNullOrEmpty(rs?.AddressLine1))
+                {
+                    <div style="font-size:0.82rem;color:#555">@rs.AddressLine1</div>
+                }
+                @if (!string.IsNullOrEmpty(rs?.AddressLine2))
+                {
+                    <div style="font-size:0.82rem;color:#555">@rs.AddressLine2</div>
+                }
+                @if (!string.IsNullOrEmpty(rs?.City))
+                {
+                    <div style="font-size:0.82rem;color:#555">@rs.City @rs.PostalCode</div>
+                }
+            </div>
+            <div class="to-box">
+                <div class="section-label">Tenant</div>
+                <div style="font-size:1rem;font-weight:700;margin-top:6px">@p.Room.TenantName</div>
+                <div style="font-size:0.8rem;color:#aaa;margin-top:4px">Room: @p.Room.Name</div>
+                @if (!string.IsNullOrEmpty(p.Room.TenantPhone))
+                {
+                    <div style="font-size:0.8rem;color:#aaa">Phone: @p.Room.TenantPhone</div>
+                }
+            </div>
+        </div>
+
+        <div style="height:2px;background:#e0e0e0"></div>
+
+        <!-- PAYMENT TABLE -->
+        <div class="items-section">
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th class="text-end">Amount (R)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="background:#f8f9fa">
+                        <td><strong>Rent — @p.Room.Name (@monthName)</strong></td>
+                        <td class="text-end">@p.AmountDue.ToString("N2")</td>
+                    </tr>
+                    @if (p.AmountPaid.HasValue && p.AmountPaid != p.AmountDue)
+                    {
+                        <tr>
+                            <td style="color:#888">Amount Due</td>
+                            <td class="text-end" style="color:#888">@p.AmountDue.ToString("N2")</td>
+                        </tr>
+                    }
+                    <tr class="total-row">
+                        <td>AMOUNT RECEIVED</td>
+                        <td class="text-end">R @paid.ToString("N2")</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        @if (!string.IsNullOrEmpty(p.Notes))
+        {
+            <div class="notes-section">
+                <strong>Notes:</strong> @p.Notes
+            </div>
+        }
+
+        @if (banking != null && !string.IsNullOrEmpty(banking.BankName))
+        {
+            <div class="banking-section">
+                <div class="banking-label mb-2">Banking Details</div>
+                <div class="row g-3">
+                    <div class="col-6 col-md-3">
+                        <div class="banking-label">Bank</div>
+                        <div class="banking-value">@banking.BankName</div>
+                    </div>
+                    @if (!string.IsNullOrEmpty(banking.AccountNumber))
+                    {
+                        <div class="col-6 col-md-3">
+                            <div class="banking-label">Account Number</div>
+                            <div class="banking-value">@banking.AccountNumber</div>
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(banking.AccountType))
+                    {
+                        <div class="col-6 col-md-3">
+                            <div class="banking-label">Account Type</div>
+                            <div class="banking-value">@banking.AccountType</div>
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(banking.BranchCode))
+                    {
+                        <div class="col-6 col-md-3">
+                            <div class="banking-label">Branch Code</div>
+                            <div class="banking-value">@banking.BranchCode</div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <div class="paid-confirm">PAYMENT RECEIVED IN FULL</div>
+        <div style="height:16px"></div>
+
+        <!-- FOOTER -->
+        <div class="receipt-footer">
+            Thank you &mdash; <strong>@(rs?.PropertyName ?? "")</strong> &mdash; @receiptRef
+        </div>
+
+    </div>
+
+    <script src="/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

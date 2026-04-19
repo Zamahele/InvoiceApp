@@ -26,10 +26,10 @@ public class DownloadReceiptModel : PageModel
         if (payment == null || !payment.IsPaid)
             return NotFound();
 
-        var company = await _db.CompanySettings.FirstOrDefaultAsync();
+        var rentSettings = await _db.RentSettings.FirstOrDefaultAsync();
         var banking = await _db.BankingDetails.FirstOrDefaultAsync();
 
-        var pdf = _pdfService.Generate(payment, company, banking);
+        var pdf = _pdfService.Generate(payment, rentSettings, banking);
 
         var roomSlug = payment.Room.Name.Replace(" ", "-").ToLowerInvariant();
         var filename = $"receipt-{roomSlug}-{payment.Year}-{payment.Month:D2}.pdf";

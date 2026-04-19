@@ -13,9 +13,10 @@ public class RentReceiptPdfService
     private const string Muted = "#888888";
     private const string Body  = "#333333";
 
-    public byte[] Generate(RentPayment payment, CompanySettings? company, BankingDetails? banking)
+    public byte[] Generate(RentPayment payment, RentSettings? rentSettings, BankingDetails? banking)
     {
-        var companyName = company?.Name ?? string.Empty;
+        var propertyName = rentSettings?.PropertyName ?? string.Empty;
+        var agentName = rentSettings?.AgentName ?? string.Empty;
         var monthName = new DateTime(payment.Year, payment.Month, 1).ToString("MMMM yyyy");
         var receiptRef = $"RCP-{payment.Year}{payment.Month:D2}-{payment.Room.Name.Replace(" ", "").ToUpperInvariant()[..Math.Min(4, payment.Room.Name.Length)]}";
 
@@ -27,7 +28,7 @@ public class RentReceiptPdfService
                 page.Margin(0);
                 page.DefaultTextStyle(x => x.FontSize(9).FontFamily("Arial").FontColor(Body));
 
-                var stampSvg = BuildReceiptStampSvg(companyName, receiptRef);
+                var stampSvg = BuildReceiptStampSvg(propertyName, receiptRef);
                 var stampImage = SvgImage.FromText(stampSvg);
 
                 page.Foreground()
@@ -44,12 +45,17 @@ public class RentReceiptPdfService
                     {
                         row.RelativeItem().Column(left =>
                         {
-                            left.Item().Text(companyName)
+                            left.Item().Text(propertyName)
                                 .FontSize(16).Bold().FontColor("#ffffff");
 
-                            if (!string.IsNullOrEmpty(company?.Phone))
+                            if (!string.IsNullOrEmpty(agentName))
                                 left.Item().PaddingTop(4)
-                                    .Text(company.Phone)
+                                    .Text($"Agent: {agentName}")
+                                    .FontSize(8).FontColor("#cccccc");
+
+                            if (!string.IsNullOrEmpty(rentSettings?.AgentPhone))
+                                left.Item().PaddingTop(2)
+                                    .Text(rentSettings.AgentPhone)
                                     .FontSize(8).FontColor("#cccccc");
                         });
 
@@ -97,19 +103,23 @@ public class RentReceiptPdfService
                                 .FontSize(7).Bold().FontColor(Gold).LetterSpacing(0.15f);
 
                             from.Item().PaddingTop(5)
-                                .Text(companyName)
+                                .Text(propertyName)
                                 .FontSize(10).Bold().FontColor(Navy);
 
-                            if (!string.IsNullOrEmpty(company?.AddressLine1))
-                                from.Item().Text(company.AddressLine1)
+                            if (!string.IsNullOrEmpty(agentName))
+                                from.Item().PaddingTop(2).Text($"Agent: {agentName}")
                                     .FontSize(8.5f).FontColor("#555555");
 
-                            if (!string.IsNullOrEmpty(company?.AddressLine2))
-                                from.Item().Text(company.AddressLine2)
+                            if (!string.IsNullOrEmpty(rentSettings?.AddressLine1))
+                                from.Item().Text(rentSettings.AddressLine1)
                                     .FontSize(8.5f).FontColor("#555555");
 
-                            if (!string.IsNullOrEmpty(company?.City))
-                                from.Item().Text($"{company.City} {company.PostalCode}")
+                            if (!string.IsNullOrEmpty(rentSettings?.AddressLine2))
+                                from.Item().Text(rentSettings.AddressLine2)
+                                    .FontSize(8.5f).FontColor("#555555");
+
+                            if (!string.IsNullOrEmpty(rentSettings?.City))
+                                from.Item().Text($"{rentSettings.City} {rentSettings.PostalCode}")
                                     .FontSize(8.5f).FontColor("#555555");
                         });
 
@@ -258,7 +268,7 @@ public class RentReceiptPdfService
                     .Text(txt =>
                     {
                         txt.Span("Thank you  —  ").FontColor("#aaaaaa").FontSize(8);
-                        txt.Span(companyName).FontColor("#cccccc").FontSize(8).Bold();
+                        txt.Span(propertyName).FontColor("#cccccc").FontSize(8).Bold();
                         txt.Span($"  —  {receiptRef}").FontColor("#aaaaaa").FontSize(8);
                     });
             });
