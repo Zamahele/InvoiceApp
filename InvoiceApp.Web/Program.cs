@@ -8,6 +8,7 @@ QuestPDF.Settings.License = LicenseType.Community;
 
 builder.Services.AddRazorPages();
 builder.Services.AddScoped<InvoiceApp.Infrastructure.Services.InvoicePdfService>();
+builder.Services.AddScoped<InvoiceApp.Infrastructure.Services.RentReceiptPdfService>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));

@@ -129,13 +129,19 @@ else
                             Paid @(p.PaidDate.HasValue ? p.PaidDate.Value.ToString("dd MMM yyyy") : "")
                             @if (!string.IsNullOrEmpty(p.Notes)) { <span>— @p.Notes</span> }
                         </div>
-                        <form method="post" asp-page-handler="Undo" asp-route-id="@p.Id"
-                              asp-route-month="@Model.Month" asp-route-year="@Model.Year">
-                            <button type="submit" class="btn btn-outline-secondary btn-sm w-100"
-                                    onclick="return confirm('Undo payment for @p.Room.Name?')">
-                                <i class="bi bi-arrow-counterclockwise"></i> Undo
-                            </button>
-                        </form>
+                        <div class="d-flex gap-2 mt-1">
+                            <a href="/Rent/DownloadReceipt?paymentId=@p.Id"
+                               class="btn btn-warning btn-sm flex-fill" title="Download Receipt">
+                                <i class="bi bi-download"></i> Receipt
+                            </a>
+                            <form method="post" asp-page-handler="Undo" asp-route-id="@p.Id"
+                                  asp-route-month="@Model.Month" asp-route-year="@Model.Year" class="flex-fill">
+                                <button type="submit" class="btn btn-outline-secondary btn-sm w-100"
+                                        onclick="return confirm('Undo payment for @p.Room.Name?')">
+                                    <i class="bi bi-arrow-counterclockwise"></i> Undo
+                                </button>
+                            </form>
+                        </div>
                     }
                     else
                     {
@@ -219,13 +225,19 @@ else
                                     }
                                     else
                                     {
-                                        <form method="post" asp-page-handler="Undo" asp-route-id="@p.Id"
-                                              asp-route-month="@Model.Month" asp-route-year="@Model.Year">
-                                            <button type="submit" class="btn btn-outline-secondary btn-sm"
-                                                    onclick="return confirm('Undo payment for @p.Room.Name?')">
-                                                <i class="bi bi-arrow-counterclockwise"></i> Undo
-                                            </button>
-                                        </form>
+                                        <div class="d-flex gap-1 justify-content-end">
+                                            <a href="/Rent/DownloadReceipt?paymentId=@p.Id"
+                                               class="btn btn-warning btn-sm" title="Download Receipt">
+                                                <i class="bi bi-download"></i> Receipt
+                                            </a>
+                                            <form method="post" asp-page-handler="Undo" asp-route-id="@p.Id"
+                                                  asp-route-month="@Model.Month" asp-route-year="@Model.Year">
+                                                <button type="submit" class="btn btn-outline-secondary btn-sm"
+                                                        onclick="return confirm('Undo payment for @p.Room.Name?')">
+                                                    <i class="bi bi-arrow-counterclockwise"></i> Undo
+                                                </button>
+                                            </form>
+                                        </div>
                                     }
                                 </td>
                             </tr>
