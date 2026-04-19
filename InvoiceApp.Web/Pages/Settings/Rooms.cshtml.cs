@@ -14,6 +14,8 @@ public class RoomsModel : PageModel
 
     public List<Room> Rooms { get; set; } = new();
 
+    [BindProperty] public RentSettings Property { get; set; } = new();
+
     [BindProperty] public string NewName { get; set; } = string.Empty;
     [BindProperty] public string NewTenantName { get; set; } = string.Empty;
     [BindProperty] public string NewTenantPhone { get; set; } = string.Empty;
@@ -25,11 +27,59 @@ public class RoomsModel : PageModel
     [BindProperty] public string EditTenantPhone { get; set; } = string.Empty;
     [BindProperty] public decimal EditRentAmount { get; set; }
 
-    public string? StatusMessage { get; set; }
+    [TempData] public string? StatusMessage { get; set; }
 
     public async Task OnGetAsync()
     {
         Rooms = await _db.Rooms.OrderBy(r => r.Name).ToListAsync();
+        Property = await _db.RentSettings.FirstOrDefaultAsync() ?? new RentSettings();
+    }
+
+    public async Task<IActionResult> OnPostSavePropertyAsync()
+    {
+        Property.PropertyName = Property.PropertyName?.Trim() ?? string.Empty;
+        Property.AgentName = Property.AgentName?.Trim() ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(Property.PropertyName))
+            ModelState.AddModelError("Property.PropertyName", "Property name is required.");
+
+        if (string.IsNullOrWhiteSpace(Property.AgentName))
+            ModelState.AddModelError("Property.AgentName", "Agent name is required.");
+
+        if (!ModelState.IsValid)
+        {
+            Rooms = await _db.Rooms.OrderBy(r => r.Name).ToListAsync();
+            return Page();
+        }
+
+        var existing = await _db.RentSettings.FirstOrDefaultAsync();
+        if (existing == null)
+        {
+            _db.RentSettings.Add(new RentSettings
+            {
+                PropertyName = Property.PropertyName,
+                AgentName = Property.AgentName,
+                AgentPhone = Property.AgentPhone?.Trim(),
+                AddressLine1 = Property.AddressLine1?.Trim(),
+                AddressLine2 = Property.AddressLine2?.Trim(),
+                City = Property.City?.Trim(),
+                PostalCode = Property.PostalCode?.Trim()
+            });
+        }
+        else
+        {
+            existing.PropertyName = Property.PropertyName;
+            existing.AgentName = Property.AgentName;
+            existing.AgentPhone = Property.AgentPhone?.Trim();
+            existing.AddressLine1 = Property.AddressLine1?.Trim();
+            existing.AddressLine2 = Property.AddressLine2?.Trim();
+            existing.City = Property.City?.Trim();
+            existing.PostalCode = Property.PostalCode?.Trim();
+        }
+
+        await _db.SaveChangesAsync();
+        TempData["StatusMessage"] = "Property settings saved.";
+        return RedirectToPage();
     }
 
     public async Task<IActionResult> OnPostAddAsync()
@@ -39,18 +89,15 @@ public class RoomsModel : PageModel
         NewTenantPhone = NewTenantPhone?.Trim() ?? string.Empty;
 
         if (string.IsNullOrWhiteSpace(NewName))
-        {
             ModelState.AddModelError("NewName", "Room name is required.");
-        }
 
         if (NewRentAmount < 0)
-        {
             ModelState.AddModelError("NewRentAmount", "Rent amount cannot be negative.");
-        }
 
         if (!ModelState.IsValid)
         {
             Rooms = await _db.Rooms.OrderBy(r => r.Name).ToListAsync();
+            Property = await _db.RentSettings.FirstOrDefaultAsync() ?? new RentSettings();
             return Page();
         }
 
@@ -63,9 +110,8 @@ public class RoomsModel : PageModel
             IsActive = true
         });
         await _db.SaveChangesAsync();
-        StatusMessage = "Room added.";
-        Rooms = await _db.Rooms.OrderBy(r => r.Name).ToListAsync();
-        return Page();
+        TempData["StatusMessage"] = "Room added.";
+        return RedirectToPage();
     }
 
     public async Task<IActionResult> OnPostEditAsync()
@@ -86,6 +132,7 @@ public class RoomsModel : PageModel
         if (!ModelState.IsValid)
         {
             Rooms = await _db.Rooms.OrderBy(r => r.Name).ToListAsync();
+            Property = await _db.RentSettings.FirstOrDefaultAsync() ?? new RentSettings();
             return Page();
         }
 
@@ -94,9 +141,8 @@ public class RoomsModel : PageModel
         room.TenantPhone = EditTenantPhone;
         room.RentAmount = EditRentAmount;
         await _db.SaveChangesAsync();
-        StatusMessage = "Room updated.";
-        Rooms = await _db.Rooms.OrderBy(r => r.Name).ToListAsync();
-        return Page();
+        TempData["StatusMessage"] = "Room updated.";
+        return RedirectToPage();
     }
 
     public async Task<IActionResult> OnPostToggleAsync(int id)
@@ -106,8 +152,7 @@ public class RoomsModel : PageModel
 
         room.IsActive = !room.IsActive;
         await _db.SaveChangesAsync();
-        StatusMessage = room.IsActive ? $"'{room.Name}' activated." : $"'{room.Name}' deactivated.";
-        Rooms = await _db.Rooms.OrderBy(r => r.Name).ToListAsync();
-        return Page();
+        TempData["StatusMessage"] = room.IsActive ? $"'{room.Name}' activated." : $"'{room.Name}' deactivated.";
+        return RedirectToPage();
     }
 }

@@ -14,6 +14,7 @@ public class AppDbContext : DbContext
     public DbSet<SavedRate> SavedRates => Set<SavedRate>();
     public DbSet<Room> Rooms => Set<Room>();
     public DbSet<RentPayment> RentPayments => Set<RentPayment>();
+    public DbSet<RentSettings> RentSettings => Set<RentSettings>();
     public DbSet<ErrorLog> ErrorLogs => Set<ErrorLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

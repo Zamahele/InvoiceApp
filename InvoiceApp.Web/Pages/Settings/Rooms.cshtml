@@ -32,6 +32,53 @@
     </div>
 }
 
+@* ── PROPERTY / AGENT SETTINGS ── *@
+<div class="card mb-4">
+    <div class="card-header fw-semibold"><i class="bi bi-building"></i> Property / Agent Details</div>
+    <div class="card-body">
+        <p class="text-muted small mb-3">This appears as the <strong>FROM</strong> section on rent receipts.</p>
+        <form method="post" asp-page-handler="SaveProperty">
+            <div class="row g-3">
+                <div class="col-12 col-md-6">
+                    <label class="form-label">Property / Cottage Name <span class="text-danger">*</span></label>
+                    <input asp-for="Property.PropertyName" class="form-control" placeholder="e.g. Sunset Cottages" />
+                    <span asp-validation-for="Property.PropertyName" class="text-danger small"></span>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label">Agent Name <span class="text-danger">*</span></label>
+                    <input asp-for="Property.AgentName" class="form-control" placeholder="e.g. John Smith" />
+                    <span asp-validation-for="Property.AgentName" class="text-danger small"></span>
+                </div>
+                <div class="col-12 col-md-4">
+                    <label class="form-label">Agent Phone</label>
+                    <input asp-for="Property.AgentPhone" class="form-control" placeholder="082 000 0000" />
+                </div>
+                <div class="col-12 col-md-4">
+                    <label class="form-label">Address Line 1</label>
+                    <input asp-for="Property.AddressLine1" class="form-control" placeholder="Street address" />
+                </div>
+                <div class="col-12 col-md-4">
+                    <label class="form-label">Address Line 2</label>
+                    <input asp-for="Property.AddressLine2" class="form-control" placeholder="Suburb" />
+                </div>
+                <div class="col-12 col-md-4">
+                    <label class="form-label">City</label>
+                    <input asp-for="Property.City" class="form-control" placeholder="City" />
+                </div>
+                <div class="col-12 col-md-4">
+                    <label class="form-label">Postal Code</label>
+                    <input asp-for="Property.PostalCode" class="form-control" placeholder="0000" />
+                </div>
+                <div class="col-12 col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-save"></i> Save Property Details
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
 @if (!Model.Rooms.Any())
 {
     <p class="text-muted text-center py-4">No rooms yet. Add one below.</p>
