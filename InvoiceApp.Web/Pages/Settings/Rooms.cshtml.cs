@@ -62,12 +62,13 @@ public class RoomsModel : PageModel
         NewPropertyName = NewPropertyName?.Trim() ?? string.Empty;
         NewPropertyAgent = NewPropertyAgent?.Trim() ?? string.Empty;
 
+        var hasError = false;
         if (string.IsNullOrWhiteSpace(NewPropertyName))
-            ModelState.AddModelError("NewPropertyName", "Property name is required.");
+        { ModelState.AddModelError("NewPropertyName", "Property name is required."); hasError = true; }
         if (string.IsNullOrWhiteSpace(NewPropertyAgent))
-            ModelState.AddModelError("NewPropertyAgent", "Agent name is required.");
+        { ModelState.AddModelError("NewPropertyAgent", "Agent name is required."); hasError = true; }
 
-        if (!ModelState.IsValid)
+        if (hasError)
         {
             Properties = await _db.Properties.OrderBy(p => p.Name).ToListAsync();
             Rooms = await _db.Rooms.Include(r => r.Property).OrderBy(r => r.Name).ToListAsync();
@@ -97,12 +98,13 @@ public class RoomsModel : PageModel
         EditPropertyName = EditPropertyName?.Trim() ?? string.Empty;
         EditPropertyAgent = EditPropertyAgent?.Trim() ?? string.Empty;
 
+        var hasError = false;
         if (string.IsNullOrWhiteSpace(EditPropertyName))
-            ModelState.AddModelError("EditPropertyName", "Property name is required.");
+        { ModelState.AddModelError("EditPropertyName", "Property name is required."); hasError = true; }
         if (string.IsNullOrWhiteSpace(EditPropertyAgent))
-            ModelState.AddModelError("EditPropertyAgent", "Agent name is required.");
+        { ModelState.AddModelError("EditPropertyAgent", "Agent name is required."); hasError = true; }
 
-        if (!ModelState.IsValid)
+        if (hasError)
         {
             Properties = await _db.Properties.OrderBy(p => p.Name).ToListAsync();
             Rooms = await _db.Rooms.Include(r => r.Property).OrderBy(r => r.Name).ToListAsync();
@@ -127,12 +129,13 @@ public class RoomsModel : PageModel
         NewTenantName = NewTenantName?.Trim() ?? string.Empty;
         NewTenantPhone = NewTenantPhone?.Trim() ?? string.Empty;
 
+        var hasError = false;
         if (string.IsNullOrWhiteSpace(NewName))
-            ModelState.AddModelError("NewName", "Room name is required.");
+        { ModelState.AddModelError("NewName", "Room name is required."); hasError = true; }
         if (NewRentAmount < 0)
-            ModelState.AddModelError("NewRentAmount", "Rent amount cannot be negative.");
+        { ModelState.AddModelError("NewRentAmount", "Rent amount cannot be negative."); hasError = true; }
 
-        if (!ModelState.IsValid)
+        if (hasError)
         {
             Properties = await _db.Properties.OrderBy(p => p.Name).ToListAsync();
             Rooms = await _db.Rooms.Include(r => r.Property).OrderBy(r => r.Name).ToListAsync();
@@ -162,12 +165,13 @@ public class RoomsModel : PageModel
         EditTenantName = EditTenantName?.Trim() ?? string.Empty;
         EditTenantPhone = EditTenantPhone?.Trim() ?? string.Empty;
 
+        var hasError = false;
         if (string.IsNullOrWhiteSpace(EditName))
-            ModelState.AddModelError("EditName", "Room name is required.");
+        { ModelState.AddModelError("EditName", "Room name is required."); hasError = true; }
         if (EditRentAmount < 0)
-            ModelState.AddModelError("EditRentAmount", "Rent amount cannot be negative.");
+        { ModelState.AddModelError("EditRentAmount", "Rent amount cannot be negative."); hasError = true; }
 
-        if (!ModelState.IsValid)
+        if (hasError)
         {
             Properties = await _db.Properties.OrderBy(p => p.Name).ToListAsync();
             Rooms = await _db.Rooms.Include(r => r.Property).OrderBy(r => r.Name).ToListAsync();
