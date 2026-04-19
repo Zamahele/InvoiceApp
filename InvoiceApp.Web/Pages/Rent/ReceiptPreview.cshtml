@@ -5,7 +5,7 @@
     Layout = null;
 
     var p = Model.Payment;
-    var rs = Model.RentSettings;
+    var prop = p.Room.Property;
     var banking = Model.Banking;
     var monthName = new DateTime(p.Year, p.Month, 1).ToString("MMMM yyyy");
     var receiptRef = $"RCP-{p.Year}{p.Month:D2}-{p.Room.Name.Replace(" ", "").ToUpperInvariant()[..Math.Min(4, p.Room.Name.Length)]}";
@@ -212,7 +212,7 @@
             <circle cx="65" cy="65" r="61" fill="none" stroke="#1a1a2e" stroke-width="3"/>
             <circle cx="65" cy="65" r="52" fill="none" stroke="#1a1a2e" stroke-width="1.5"/>
             <text font-size="9" font-weight="700" fill="#1a1a2e" letter-spacing="1.5">
-                <textPath href="#topArc" startOffset="50%" text-anchor="middle">@((rs?.PropertyName ?? "").ToUpperInvariant())</textPath>
+                <textPath href="#topArc" startOffset="50%" text-anchor="middle">@((prop?.Name ?? "").ToUpperInvariant())</textPath>
             </text>
             <line x1="24" y1="48" x2="106" y2="48" stroke="#1a1a2e" stroke-width="1"/>
             <line x1="24" y1="86" x2="106" y2="86" stroke="#1a1a2e" stroke-width="1"/>
@@ -224,14 +224,14 @@
         <!-- HEADER -->
         <div class="receipt-header">
             <div>
-                <div class="property-name">@(rs?.PropertyName ?? "Property")</div>
-                @if (!string.IsNullOrEmpty(rs?.AgentName))
+                <div class="property-name">@(prop?.Name ?? "Property")</div>
+                @if (!string.IsNullOrEmpty(prop?.AgentName))
                 {
-                    <div style="color:#ccc;font-size:0.8rem;margin-top:4px">Agent: @rs.AgentName</div>
+                    <div style="color:#ccc;font-size:0.8rem;margin-top:4px">Agent: @prop.AgentName</div>
                 }
-                @if (!string.IsNullOrEmpty(rs?.AgentPhone))
+                @if (!string.IsNullOrEmpty(prop?.AgentPhone))
                 {
-                    <div style="color:#ccc;font-size:0.75rem">@rs.AgentPhone</div>
+                    <div style="color:#ccc;font-size:0.75rem">@prop.AgentPhone</div>
                 }
             </div>
             <div style="text-align:right">
@@ -259,23 +259,23 @@
             <div class="from-box">
                 <div class="section-label">From</div>
                 <div style="font-size:1rem;font-weight:700;color:var(--navy);margin-top:6px">
-                    @(rs?.PropertyName ?? "Property")
+                    @(prop?.Name ?? "Property")
                 </div>
-                @if (!string.IsNullOrEmpty(rs?.AgentName))
+                @if (!string.IsNullOrEmpty(prop?.AgentName))
                 {
-                    <div style="font-size:0.85rem;color:#555;margin-top:2px">Agent: @rs.AgentName</div>
+                    <div style="font-size:0.85rem;color:#555;margin-top:2px">Agent: @prop.AgentName</div>
                 }
-                @if (!string.IsNullOrEmpty(rs?.AddressLine1))
+                @if (!string.IsNullOrEmpty(prop?.AddressLine1))
                 {
-                    <div style="font-size:0.82rem;color:#555">@rs.AddressLine1</div>
+                    <div style="font-size:0.82rem;color:#555">@prop.AddressLine1</div>
                 }
-                @if (!string.IsNullOrEmpty(rs?.AddressLine2))
+                @if (!string.IsNullOrEmpty(prop?.AddressLine2))
                 {
-                    <div style="font-size:0.82rem;color:#555">@rs.AddressLine2</div>
+                    <div style="font-size:0.82rem;color:#555">@prop.AddressLine2</div>
                 }
-                @if (!string.IsNullOrEmpty(rs?.City))
+                @if (!string.IsNullOrEmpty(prop?.City))
                 {
-                    <div style="font-size:0.82rem;color:#555">@rs.City @rs.PostalCode</div>
+                    <div style="font-size:0.82rem;color:#555">@prop.City @prop.PostalCode</div>
                 }
             </div>
             <div class="to-box">
@@ -366,7 +366,7 @@
 
         <!-- FOOTER -->
         <div class="receipt-footer">
-            Thank you &mdash; <strong>@(rs?.PropertyName ?? "")</strong> &mdash; @receiptRef
+            Thank you &mdash; <strong>@(prop?.Name ?? "")</strong> &mdash; @receiptRef
         </div>
 
     </div>

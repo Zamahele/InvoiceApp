@@ -20,16 +20,14 @@ public class DownloadReceiptModel : PageModel
     public async Task<IActionResult> OnGetAsync(int paymentId)
     {
         var payment = await _db.RentPayments
-            .Include(p => p.Room)
+            .Include(p => p.Room).ThenInclude(r => r.Property)
             .FirstOrDefaultAsync(p => p.Id == paymentId);
 
         if (payment == null || !payment.IsPaid)
             return NotFound();
 
-        var rentSettings = await _db.RentSettings.FirstOrDefaultAsync();
         var banking = await _db.BankingDetails.FirstOrDefaultAsync();
-
-        var pdf = _pdfService.Generate(payment, rentSettings, banking);
+        var pdf = _pdfService.Generate(payment, banking);
 
         var roomSlug = payment.Room.Name.Replace(" ", "-").ToLowerInvariant();
         var filename = $"receipt-{roomSlug}-{payment.Year}-{payment.Month:D2}.pdf";

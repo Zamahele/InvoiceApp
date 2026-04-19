@@ -14,7 +14,7 @@ public class AppDbContext : DbContext
     public DbSet<SavedRate> SavedRates => Set<SavedRate>();
     public DbSet<Room> Rooms => Set<Room>();
     public DbSet<RentPayment> RentPayments => Set<RentPayment>();
-    public DbSet<RentSettings> RentSettings => Set<RentSettings>();
+    public DbSet<Property> Properties => Set<Property>();
     public DbSet<ErrorLog> ErrorLogs => Set<ErrorLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -23,6 +23,12 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<Room>()
             .Property(r => r.RentAmount).HasColumnType("decimal(18,2)");
+
+        modelBuilder.Entity<Room>()
+            .HasOne(r => r.Property)
+            .WithMany(p => p.Rooms)
+            .HasForeignKey(r => r.PropertyId)
+            .OnDelete(DeleteBehavior.SetNull);
 
         modelBuilder.Entity<RentPayment>(b =>
         {

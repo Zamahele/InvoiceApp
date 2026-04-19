@@ -13,10 +13,10 @@ public class RentReceiptPdfService
     private const string Muted = "#888888";
     private const string Body  = "#333333";
 
-    public byte[] Generate(RentPayment payment, RentSettings? rentSettings, BankingDetails? banking)
+    public byte[] Generate(RentPayment payment, BankingDetails? banking)
     {
-        var propertyName = rentSettings?.PropertyName ?? string.Empty;
-        var agentName = rentSettings?.AgentName ?? string.Empty;
+        var propertyName = payment.Room.Property?.Name ?? string.Empty;
+        var agentName = payment.Room.Property?.AgentName ?? string.Empty;
         var monthName = new DateTime(payment.Year, payment.Month, 1).ToString("MMMM yyyy");
         var receiptRef = $"RCP-{payment.Year}{payment.Month:D2}-{payment.Room.Name.Replace(" ", "").ToUpperInvariant()[..Math.Min(4, payment.Room.Name.Length)]}";
 
@@ -53,9 +53,9 @@ public class RentReceiptPdfService
                                     .Text($"Agent: {agentName}")
                                     .FontSize(8).FontColor("#cccccc");
 
-                            if (!string.IsNullOrEmpty(rentSettings?.AgentPhone))
+                            if (!string.IsNullOrEmpty(payment.Room.Property?.AgentPhone))
                                 left.Item().PaddingTop(2)
-                                    .Text(rentSettings.AgentPhone)
+                                    .Text(payment.Room.Property.AgentPhone)
                                     .FontSize(8).FontColor("#cccccc");
                         });
 
@@ -110,16 +110,16 @@ public class RentReceiptPdfService
                                 from.Item().PaddingTop(2).Text($"Agent: {agentName}")
                                     .FontSize(8.5f).FontColor("#555555");
 
-                            if (!string.IsNullOrEmpty(rentSettings?.AddressLine1))
-                                from.Item().Text(rentSettings.AddressLine1)
+                            if (!string.IsNullOrEmpty(payment.Room.Property?.AddressLine1))
+                                from.Item().Text(payment.Room.Property.AddressLine1)
                                     .FontSize(8.5f).FontColor("#555555");
 
-                            if (!string.IsNullOrEmpty(rentSettings?.AddressLine2))
-                                from.Item().Text(rentSettings.AddressLine2)
+                            if (!string.IsNullOrEmpty(payment.Room.Property?.AddressLine2))
+                                from.Item().Text(payment.Room.Property.AddressLine2)
                                     .FontSize(8.5f).FontColor("#555555");
 
-                            if (!string.IsNullOrEmpty(rentSettings?.City))
-                                from.Item().Text($"{rentSettings.City} {rentSettings.PostalCode}")
+                            if (!string.IsNullOrEmpty(payment.Room.Property?.City))
+                                from.Item().Text($"{payment.Room.Property.City} {payment.Room.Property.PostalCode}")
                                     .FontSize(8.5f).FontColor("#555555");
                         });
 

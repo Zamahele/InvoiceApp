@@ -8,5 +8,7 @@ public class Room
     public string TenantPhone { get; set; } = string.Empty;
     public decimal RentAmount { get; set; }
     public bool IsActive { get; set; } = true;
+    public int? PropertyId { get; set; }
+    public Property? Property { get; set; }
     public ICollection<RentPayment> Payments { get; set; } = new List<RentPayment>();
 }
