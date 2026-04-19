@@ -93,13 +93,15 @@
                 @for (int i = 0; i < Model.Items.Count; i++)
                 {
                     <div class="line-item border rounded p-2 mb-2">
-                        <div class="mb-1">
-                            <input name="Items[@i].Description" class="form-control form-control-sm"
+                        <div class="mb-2">
+                            <label class="form-label small mb-1">Description</label>
+                            <input name="Items[@i].Description" class="form-control form-control"
                                    placeholder="Description" />
                         </div>
-                        <div class="row g-1 mb-1">
-                            <div class="col-4">
-                                <select name="Items[@i].Unit" class="form-select form-select-sm">
+                        <div class="row g-2 mb-2">
+                            <div class="col-12 col-sm-4">
+                                <label class="form-label small mb-1">Unit</label>
+                                <select name="Items[@i].Unit" class="form-select form-select">
                                     <option value="m2">m2</option>
                                     <option value="m">m (linear)</option>
                                     <option value="m3">m3</option>
@@ -110,18 +112,20 @@
                                     <option value="bag">bag</option>
                                 </select>
                             </div>
-                            <div class="col-4">
+                            <div class="col-6 col-sm-4">
+                                <label class="form-label small mb-1">Qty</label>
                                 <input name="Items[@i].Quantity" type="number" step="0.001"
-                                       class="form-control form-control-sm qty-input" placeholder="Qty" />
+                                       class="form-control form-control qty-input" placeholder="Qty" />
                             </div>
-                            <div class="col-4">
+                            <div class="col-6 col-sm-4">
+                                <label class="form-label small mb-1">Rate (R)</label>
                                 <input name="Items[@i].Rate" type="number" step="0.01"
-                                       class="form-control form-control-sm rate-input" placeholder="Rate R" />
+                                       class="form-control form-control rate-input" placeholder="Rate" />
                             </div>
                         </div>
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="fw-semibold text-primary amount-display">R 0.00</span>
-                            <button type="button" class="btn btn-sm btn-outline-danger remove-row">
+                            <button type="button" class="btn btn-sm btn-outline-danger remove-row" style="min-width: 44px; min-height: 44px;">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </div>
@@ -129,7 +133,7 @@
                 }
             </div>
 
-            <button type="button" class="btn btn-outline-primary btn-sm w-100 mt-1" id="addRow">
+            <button type="button" class="btn btn-outline-primary w-100 mt-2" id="addRow" style="min-height: 44px;">
                 <i class="bi bi-plus-circle"></i> Add Line Item
             </button>
         </div>
@@ -248,12 +252,14 @@
     function getItemTemplate(index) {
         return `
         <div class="line-item border rounded p-2 mb-2">
-            <div class="mb-1">
-                <input name="Items[${index}].Description" class="form-control form-control-sm" placeholder="Description" />
+            <div class="mb-2">
+                <label class="form-label small mb-1">Description</label>
+                <input name="Items[${index}].Description" class="form-control form-control" placeholder="Description" />
             </div>
-            <div class="row g-1 mb-1">
-                <div class="col-4">
-                    <select name="Items[${index}].Unit" class="form-select form-select-sm">
+            <div class="row g-2 mb-2">
+                <div class="col-12 col-sm-4">
+                    <label class="form-label small mb-1">Unit</label>
+                    <select name="Items[${index}].Unit" class="form-select form-select">
                         <option value="m2">m2</option>
                         <option value="m">m (linear)</option>
                         <option value="m3">m3</option>
@@ -264,18 +270,20 @@
                         <option value="bag">bag</option>
                     </select>
                 </div>
-                <div class="col-4">
+                <div class="col-6 col-sm-4">
+                    <label class="form-label small mb-1">Qty</label>
                     <input name="Items[${index}].Quantity" type="number" step="0.001"
-                           class="form-control form-control-sm qty-input" placeholder="Qty" />
+                           class="form-control form-control qty-input" placeholder="Qty" />
                 </div>
-                <div class="col-4">
+                <div class="col-6 col-sm-4">
+                    <label class="form-label small mb-1">Rate (R)</label>
                     <input name="Items[${index}].Rate" type="number" step="0.01"
-                           class="form-control form-control-sm rate-input" placeholder="Rate R" />
+                           class="form-control form-control rate-input" placeholder="Rate" />
                 </div>
             </div>
             <div class="d-flex justify-content-between align-items-center">
                 <span class="fw-semibold text-primary amount-display">R 0.00</span>
-                <button type="button" class="btn btn-sm btn-outline-danger remove-row">
+                <button type="button" class="btn btn-sm btn-outline-danger remove-row" style="min-width: 44px; min-height: 44px;">
                     <i class="bi bi-trash"></i>
                 </button>
             </div>
@@ -378,25 +386,13 @@
     attachListeners();
     recalculate();
 
-    // Bootstrap validation + line item check on submit
+    // Bootstrap validation on submit
     document.getElementById('invoiceForm').addEventListener('submit', function (e) {
-        const hasItem = [...document.querySelectorAll('.line-item')]
-            .some(row => row.querySelector('[placeholder="Description"]')?.value.trim());
-
-        if (!this.checkValidity() || !hasItem) {
+        if (!this.checkValidity()) {
             e.preventDefault();
             e.stopPropagation();
-            if (!hasItem) {
-                const lineItemsCard = document.getElementById('lineItems');
-                lineItemsCard.insertAdjacentHTML('afterend',
-                    '<div id="lineItemError" class="text-danger small mt-1">At least one line item with a description is required.</div>');
-            }
         }
         this.classList.add('was-validated');
-    });
-
-    document.getElementById('addRow').addEventListener('click', function () {
-        document.getElementById('lineItemError')?.remove();
     });
 </script>
 }
