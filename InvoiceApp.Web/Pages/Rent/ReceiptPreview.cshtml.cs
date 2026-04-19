@@ -13,20 +13,18 @@ public class ReceiptPreviewModel : PageModel
     public ReceiptPreviewModel(AppDbContext db) => _db = db;
 
     public RentPayment Payment { get; set; } = null!;
-    public RentSettings? RentSettings { get; set; }
     public BankingDetails? Banking { get; set; }
 
     public async Task<IActionResult> OnGetAsync(int paymentId)
     {
         var payment = await _db.RentPayments
-            .Include(p => p.Room)
+            .Include(p => p.Room).ThenInclude(r => r.Property)
             .FirstOrDefaultAsync(p => p.Id == paymentId);
 
         if (payment == null || !payment.IsPaid)
             return NotFound();
 
         Payment = payment;
-        RentSettings = await _db.RentSettings.FirstOrDefaultAsync();
         Banking = await _db.BankingDetails.FirstOrDefaultAsync();
 
         return Page();
