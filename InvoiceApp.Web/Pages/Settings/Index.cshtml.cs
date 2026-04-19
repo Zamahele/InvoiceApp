@@ -27,6 +27,30 @@ public class IndexModel : PageModel
 
     public async Task<IActionResult> OnPostAsync()
     {
+        Company.Name = Company.Name?.Trim() ?? string.Empty;
+        Banking.BankName = Banking.BankName?.Trim() ?? string.Empty;
+        Banking.AccountType = Banking.AccountType?.Trim();
+        Banking.AccountNumber = Banking.AccountNumber?.Trim();
+        Banking.BranchCode = Banking.BranchCode?.Trim();
+
+        if (string.IsNullOrWhiteSpace(Company.Name))
+            ModelState.AddModelError("Company.Name", "Company name is required.");
+
+        if (string.IsNullOrWhiteSpace(Banking.BankName))
+            ModelState.AddModelError("Banking.BankName", "Bank name is required.");
+
+        if (string.IsNullOrWhiteSpace(Banking.AccountType))
+            ModelState.AddModelError("Banking.AccountType", "Account type is required.");
+
+        if (string.IsNullOrWhiteSpace(Banking.AccountNumber))
+            ModelState.AddModelError("Banking.AccountNumber", "Account number is required.");
+
+        if (string.IsNullOrWhiteSpace(Banking.BranchCode))
+            ModelState.AddModelError("Banking.BranchCode", "Branch code is required.");
+
+        if (!ModelState.IsValid)
+            return Page();
+
         var existingCompany = await _db.CompanySettings.FindAsync(1);
         if (existingCompany == null)
         {

@@ -44,20 +44,16 @@ public class CreateModel : PageModel
 
     public async Task<IActionResult> OnPostAsync()
     {
-        if (string.IsNullOrWhiteSpace(Invoice.InvoiceNumber))
-            ModelState.AddModelError("Invoice.InvoiceNumber", "Invoice number is required.");
+        Invoice.InvoiceNumber = Invoice.InvoiceNumber?.Trim() ?? string.Empty;
+        Invoice.ClientName = Invoice.ClientName?.Trim() ?? string.Empty;
 
-        if (string.IsNullOrWhiteSpace(Invoice.ClientName))
-            ModelState.AddModelError("Invoice.ClientName", "Client name is required.");
-
-        var validItems = Items.Where(i => !string.IsNullOrWhiteSpace(i.Description)).ToList();
-        if (!validItems.Any())
-            ModelState.AddModelError("Items", "At least one line item with a description is required.");
+        var validItems = ValidateInvoiceInput();
 
         if (!ModelState.IsValid)
         {
             Company = await _db.CompanySettings.FindAsync(1);
             SavedRates = await _db.SavedRates.OrderBy(r => r.Description).ToListAsync();
+            NextInvoiceNumber = Invoice.InvoiceNumber;
             return Page();
         }
 
@@ -65,8 +61,8 @@ public class CreateModel : PageModel
             .Where(i => !string.IsNullOrWhiteSpace(i.Description))
             .Select((i, idx) => new LineItem
             {
-                Description = i.Description,
-                Unit = i.Unit,
+                Description = i.Description.Trim(),
+                Unit = string.IsNullOrWhiteSpace(i.Unit) ? "unit" : i.Unit.Trim(),
                 Quantity = i.Quantity,
                 Rate = i.Rate,
                 Amount = i.Quantity * i.Rate,
@@ -97,6 +93,64 @@ public class CreateModel : PageModel
         await _db.SaveChangesAsync();
 
         return RedirectToPage("/Invoices/Preview", new { id = Invoice.Id });
+    }
+
+    private List<LineItemInput> ValidateInvoiceInput()
+    {
+        if (string.IsNullOrWhiteSpace(Invoice.InvoiceNumber))
+            ModelState.AddModelError("Invoice.InvoiceNumber", "Invoice number is required.");
+
+        if (string.IsNullOrWhiteSpace(Invoice.ClientName))
+            ModelState.AddModelError("Invoice.ClientName", "Client name is required.");
+
+        if (Invoice.InvoiceDate == default)
+            ModelState.AddModelError("Invoice.InvoiceDate", "Invoice date is required.");
+
+        if (Invoice.IsReissue && !Invoice.ReissueDate.HasValue)
+            ModelState.AddModelError("Invoice.ReissueDate", "Re-issue date is required when re-issue is enabled.");
+
+        if (Invoice.VATEnabled && (Invoice.VATRate < 0 || Invoice.VATRate > 100))
+            ModelState.AddModelError("Invoice.VATRate", "VAT rate must be between 0 and 100.");
+
+        if (Invoice.RetentionEnabled)
+        {
+            if (Invoice.RetentionPercentage < 0 || Invoice.RetentionPercentage > 100)
+                ModelState.AddModelError("Invoice.RetentionPercentage", "Retention percentage must be between 0 and 100.");
+
+            if (Invoice.RetentionType != "Deposit" && Invoice.RetentionType != "Holdback")
+                ModelState.AddModelError("Invoice.RetentionType", "Retention type must be Deposit or Holdback.");
+        }
+
+        var validItems = new List<LineItemInput>();
+        var itemsToValidate = Items ?? new List<LineItemInput>();
+
+        for (var index = 0; index < itemsToValidate.Count; index++)
+        {
+            var item = itemsToValidate[index];
+            var hasAnyValue = !string.IsNullOrWhiteSpace(item.Description)
+                || item.Quantity != 0
+                || item.Rate != 0;
+
+            if (!hasAnyValue)
+                continue;
+
+            if (string.IsNullOrWhiteSpace(item.Description))
+                ModelState.AddModelError($"Items[{index}].Description", "Description is required.");
+
+            if (item.Quantity <= 0)
+                ModelState.AddModelError($"Items[{index}].Quantity", "Quantity must be greater than 0.");
+
+            if (item.Rate < 0)
+                ModelState.AddModelError($"Items[{index}].Rate", "Rate cannot be negative.");
+
+            if (!string.IsNullOrWhiteSpace(item.Description) && item.Quantity > 0 && item.Rate >= 0)
+                validItems.Add(item);
+        }
+
+        if (!validItems.Any())
+            ModelState.AddModelError("Items", "At least one valid line item is required.");
+
+        return validItems;
     }
 
     public class LineItemInput

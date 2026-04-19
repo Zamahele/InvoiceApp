@@ -25,26 +25,49 @@ public class IndexModel : PageModel
 
     public async Task OnGetAsync()
     {
+        NormalizePeriod();
         await EnsurePaymentsForMonth();
         await LoadPayments();
     }
 
     public async Task<IActionResult> OnPostMarkPaidAsync(int id, decimal amountPaid, string? notes)
     {
+        NormalizePeriod();
         var payment = await _db.RentPayments.FindAsync(id);
-        if (payment != null)
+        if (payment == null)
         {
-            payment.IsPaid = true;
-            payment.AmountPaid = amountPaid;
-            payment.PaidDate = DateTime.Today;
-            payment.Notes = notes;
-            await _db.SaveChangesAsync();
+            ModelState.AddModelError(string.Empty, "Rent payment record not found.");
         }
-        return RedirectToPage(new { Month, Year });
+        else
+        {
+            if (amountPaid < 0)
+                ModelState.AddModelError("amountPaid", "Amount paid cannot be negative.");
+
+            if (amountPaid > payment.AmountDue)
+                ModelState.AddModelError("amountPaid", "Amount paid cannot be greater than amount due.");
+
+            if (!string.IsNullOrWhiteSpace(notes) && notes.Length > 500)
+                ModelState.AddModelError("notes", "Notes cannot exceed 500 characters.");
+
+            if (ModelState.IsValid)
+            {
+                payment.IsPaid = true;
+                payment.AmountPaid = Math.Round(amountPaid, 2);
+                payment.PaidDate = DateTime.Today;
+                payment.Notes = string.IsNullOrWhiteSpace(notes) ? null : notes.Trim();
+                await _db.SaveChangesAsync();
+                return RedirectToPage(new { Month, Year });
+            }
+        }
+
+        await EnsurePaymentsForMonth();
+        await LoadPayments();
+        return Page();
     }
 
     public async Task<IActionResult> OnPostUndoAsync(int id)
     {
+        NormalizePeriod();
         var payment = await _db.RentPayments.FindAsync(id);
         if (payment != null)
         {
@@ -55,6 +78,15 @@ public class IndexModel : PageModel
             await _db.SaveChangesAsync();
         }
         return RedirectToPage(new { Month, Year });
+    }
+
+    private void NormalizePeriod()
+    {
+        if (Month < 1 || Month > 12)
+            Month = DateTime.Today.Month;
+
+        if (Year < 2000 || Year > 2100)
+            Year = DateTime.Today.Year;
     }
 
     private async Task EnsurePaymentsForMonth()

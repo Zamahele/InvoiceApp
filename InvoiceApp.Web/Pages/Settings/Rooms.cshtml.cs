@@ -34,18 +34,31 @@ public class RoomsModel : PageModel
 
     public async Task<IActionResult> OnPostAddAsync()
     {
+        NewName = NewName?.Trim() ?? string.Empty;
+        NewTenantName = NewTenantName?.Trim() ?? string.Empty;
+        NewTenantPhone = NewTenantPhone?.Trim() ?? string.Empty;
+
         if (string.IsNullOrWhiteSpace(NewName))
         {
-            StatusMessage = "Room name is required.";
+            ModelState.AddModelError("NewName", "Room name is required.");
+        }
+
+        if (NewRentAmount < 0)
+        {
+            ModelState.AddModelError("NewRentAmount", "Rent amount cannot be negative.");
+        }
+
+        if (!ModelState.IsValid)
+        {
             Rooms = await _db.Rooms.OrderBy(r => r.Name).ToListAsync();
             return Page();
         }
 
         _db.Rooms.Add(new Room
         {
-            Name = NewName.Trim(),
-            TenantName = NewTenantName.Trim(),
-            TenantPhone = NewTenantPhone.Trim(),
+            Name = NewName,
+            TenantName = NewTenantName,
+            TenantPhone = NewTenantPhone,
             RentAmount = NewRentAmount,
             IsActive = true
         });
@@ -60,9 +73,25 @@ public class RoomsModel : PageModel
         var room = await _db.Rooms.FindAsync(EditId);
         if (room == null) return NotFound();
 
-        room.Name = EditName.Trim();
-        room.TenantName = EditTenantName.Trim();
-        room.TenantPhone = EditTenantPhone.Trim();
+        EditName = EditName?.Trim() ?? string.Empty;
+        EditTenantName = EditTenantName?.Trim() ?? string.Empty;
+        EditTenantPhone = EditTenantPhone?.Trim() ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(EditName))
+            ModelState.AddModelError("EditName", "Room name is required.");
+
+        if (EditRentAmount < 0)
+            ModelState.AddModelError("EditRentAmount", "Rent amount cannot be negative.");
+
+        if (!ModelState.IsValid)
+        {
+            Rooms = await _db.Rooms.OrderBy(r => r.Name).ToListAsync();
+            return Page();
+        }
+
+        room.Name = EditName;
+        room.TenantName = EditTenantName;
+        room.TenantPhone = EditTenantPhone;
         room.RentAmount = EditRentAmount;
         await _db.SaveChangesAsync();
         StatusMessage = "Room updated.";
