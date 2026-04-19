@@ -290,8 +290,32 @@
         /* Print */
         @@media print {
             body { background: white; }
-            .invoice-wrap { box-shadow: none; margin: 0; border-radius: 0; }
+
+            .invoice-wrap {
+                box-shadow: none;
+                margin: 0;
+                border-radius: 0;
+                max-width: 100%;          /* fill full paper width */
+                overflow: visible;        /* allow rotated stamp corners to show */
+                break-inside: avoid;
+            }
+
             .no-print { display: none !important; }
+
+            /* Restore all table columns — mobile CSS hides cols 2 & 3
+               but print can render at <600px CSS width (Firefox ~595px) */
+            .items-table thead th,
+            .items-table tbody td { display: table-cell !important; }
+
+            /* Restore desktop padding that mobile CSS overrides */
+            .items-section  { padding: 0 32px 24px !important; }
+            .banking-section { margin: 0 32px 32px !important; }
+            .notes-section   { margin: 0 32px 20px !important; }
+
+            /* Lift stamp higher so the rotated bottom corners
+               (rotate(-12deg) extends ~12px below the div's box) sit
+               clear of any page-margin cut */
+            .invoice-stamp { bottom: 100px; }
         }
 
         /* Mobile */
