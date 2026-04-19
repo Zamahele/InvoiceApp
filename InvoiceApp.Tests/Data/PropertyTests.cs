@@ -155,4 +155,37 @@ public class PropertyTests
 
         Assert.Null(ex);
     }
+
+    [Fact]
+    public async Task Property_Can_Be_Saved_With_Multiple_Rooms()
+    {
+        using var db = CreateInMemoryDb();
+
+        var property = new Property
+        {
+            Name = "Ocean View Cottages",
+            AgentName = "Mary Jones",
+            AgentPhone = "083 111 2222",
+            AddressLine1 = "5 Beach Road",
+            City = "Durban"
+        };
+        db.Properties.Add(property);
+        await db.SaveChangesAsync();
+
+        db.Rooms.AddRange(
+            new Room { Name = "Room A", TenantName = "Tenant 1", RentAmount = 4000m, PropertyId = property.Id, IsActive = true },
+            new Room { Name = "Room B", TenantName = "Tenant 2", RentAmount = 4500m, PropertyId = property.Id, IsActive = true },
+            new Room { Name = "Room C", TenantName = "Tenant 3", RentAmount = 5000m, PropertyId = property.Id, IsActive = true }
+        );
+        await db.SaveChangesAsync();
+
+        var saved = await db.Properties
+            .Include(p => p.Rooms)
+            .FirstAsync(p => p.Id == property.Id);
+
+        Assert.Equal("Ocean View Cottages", saved.Name);
+        Assert.Equal("Mary Jones", saved.AgentName);
+        Assert.Equal(3, saved.Rooms.Count);
+        Assert.All(saved.Rooms, r => Assert.Equal(property.Id, r.PropertyId));
+    }
 }
