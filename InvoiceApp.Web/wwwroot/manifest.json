@@ -1,0 +1,35 @@
+{
+  "name": "BlackTech Portal",
+  "short_name": "BlackTech",
+  "description": "Invoice and rent tracking for BlackTech",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#212529",
+  "theme_color": "#212529",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "New Invoice",
+      "url": "/Invoices/Create",
+      "description": "Create a new invoice"
+    },
+    {
+      "name": "Invoice History",
+      "url": "/Invoices/History",
+      "description": "View invoice history"
+    },
+    {
+      "name": "Rent Tracker",
+      "url": "/Rent",
+      "description": "Track rent payments"
+    }
+  ]
+}
