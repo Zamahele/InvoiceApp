@@ -188,4 +188,33 @@ public class PropertyTests
         Assert.Equal(3, saved.Rooms.Count);
         Assert.All(saved.Rooms, r => Assert.Equal(property.Id, r.PropertyId));
     }
+
+    [Fact]
+    public async Task Property_Saved_Without_Rooms_Then_Rooms_Added_And_Reference_Correctly()
+    {
+        using var db = CreateInMemoryDb();
+
+        // Step 1: save property alone (no rooms)
+        var property = new Property { Name = "Hillside Flats", AgentName = "Sipho Dlamini" };
+        db.Properties.Add(property);
+        await db.SaveChangesAsync();
+
+        var savedProperty = await db.Properties.FirstOrDefaultAsync(p => p.Id == property.Id);
+        Assert.NotNull(savedProperty);
+        Assert.Empty(await db.Rooms.Where(r => r.PropertyId == property.Id).ToListAsync());
+
+        // Step 2: add rooms referencing that property
+        db.Rooms.Add(new Room { Name = "Flat 1", TenantName = "Zola", RentAmount = 3500m, PropertyId = property.Id });
+        db.Rooms.Add(new Room { Name = "Flat 2", TenantName = "Thabo", RentAmount = 4000m, PropertyId = property.Id });
+        await db.SaveChangesAsync();
+
+        var rooms = await db.Rooms.Include(r => r.Property).Where(r => r.PropertyId == property.Id).ToListAsync();
+        Assert.Equal(2, rooms.Count);
+        Assert.All(rooms, r =>
+        {
+            Assert.NotNull(r.Property);
+            Assert.Equal("Hillside Flats", r.Property!.Name);
+            Assert.Equal("Sipho Dlamini", r.Property!.AgentName);
+        });
+    }
 }
