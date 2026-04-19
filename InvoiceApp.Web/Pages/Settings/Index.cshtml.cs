@@ -2,6 +2,7 @@ using InvoiceApp.Core.Entities;
 using InvoiceApp.Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 
 namespace InvoiceApp.Web.Pages.Settings;
 
@@ -17,12 +18,13 @@ public class IndexModel : PageModel
     [BindProperty]
     public BankingDetails Banking { get; set; } = new();
 
+    [TempData]
     public string? StatusMessage { get; set; }
 
     public async Task OnGetAsync()
     {
-        Company = await _db.CompanySettings.FindAsync(1) ?? new CompanySettings { Id = 1 };
-        Banking = await _db.BankingDetails.FindAsync(1) ?? new BankingDetails { Id = 1 };
+        Company = await _db.CompanySettings.FirstOrDefaultAsync() ?? new CompanySettings();
+        Banking = await _db.BankingDetails.FirstOrDefaultAsync() ?? new BankingDetails();
     }
 
     public async Task<IActionResult> OnPostAsync()
@@ -51,11 +53,18 @@ public class IndexModel : PageModel
         if (!ModelState.IsValid)
             return Page();
 
-        var existingCompany = await _db.CompanySettings.FindAsync(1);
+        var existingCompany = await _db.CompanySettings.FirstOrDefaultAsync();
         if (existingCompany == null)
         {
-            Company.Id = 1;
-            _db.CompanySettings.Add(Company);
+            _db.CompanySettings.Add(new CompanySettings
+            {
+                Name = Company.Name,
+                AddressLine1 = Company.AddressLine1,
+                AddressLine2 = Company.AddressLine2,
+                City = Company.City,
+                PostalCode = Company.PostalCode,
+                Phone = Company.Phone
+            });
         }
         else
         {
@@ -67,11 +76,16 @@ public class IndexModel : PageModel
             existingCompany.Phone = Company.Phone;
         }
 
-        var existingBanking = await _db.BankingDetails.FindAsync(1);
+        var existingBanking = await _db.BankingDetails.FirstOrDefaultAsync();
         if (existingBanking == null)
         {
-            Banking.Id = 1;
-            _db.BankingDetails.Add(Banking);
+            _db.BankingDetails.Add(new BankingDetails
+            {
+                BankName = Banking.BankName,
+                AccountType = Banking.AccountType,
+                AccountNumber = Banking.AccountNumber,
+                BranchCode = Banking.BranchCode
+            });
         }
         else
         {
@@ -82,7 +96,7 @@ public class IndexModel : PageModel
         }
 
         await _db.SaveChangesAsync();
-        StatusMessage = "Settings saved.";
-        return Page();
+        TempData["StatusMessage"] = "Settings saved.";
+        return RedirectToPage();
     }
 }

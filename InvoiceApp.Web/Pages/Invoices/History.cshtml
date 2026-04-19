@@ -79,6 +79,9 @@ else
                             <a href="/Invoices/Preview?id=@invoice.Id" class="btn btn-sm btn-outline-primary">
                                 <i class="bi bi-eye"></i><span class="ms-2 d-md-none">Preview</span>
                             </a>
+                            <a href="/Invoices/DownloadPdf?id=@invoice.Id" class="btn btn-sm btn-warning" title="Download PDF">
+                                <i class="bi bi-download"></i>
+                            </a>
                             <a href="/Invoices/Create?reissueFrom=@invoice.Id" class="btn btn-sm btn-outline-secondary">
                                 <i class="bi bi-arrow-repeat"></i><span class="ms-2 d-md-none">Reissue</span>
                             </a>
