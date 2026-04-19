@@ -1,22 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\zamajasonn\\InvoiceApp\\InvoiceApp.Tests\\InvoiceApp.Tests.csproj": {}
+    "c:\\Repos\\InvoiceApp\\InvoiceApp.Tests\\InvoiceApp.Tests.csproj": {}
   },
   "projects": {
-    "C:\\Users\\zamajasonn\\InvoiceApp\\InvoiceApp.Core\\InvoiceApp.Core.csproj": {
+    "c:\\Repos\\InvoiceApp\\InvoiceApp.Core\\InvoiceApp.Core.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\zamajasonn\\InvoiceApp\\InvoiceApp.Core\\InvoiceApp.Core.csproj",
+        "projectUniqueName": "c:\\Repos\\InvoiceApp\\InvoiceApp.Core\\InvoiceApp.Core.csproj",
         "projectName": "InvoiceApp.Core",
-        "projectPath": "C:\\Users\\zamajasonn\\InvoiceApp\\InvoiceApp.Core\\InvoiceApp.Core.csproj",
+        "projectPath": "c:\\Repos\\InvoiceApp\\InvoiceApp.Core\\InvoiceApp.Core.csproj",
         "packagesPath": "C:\\Users\\zamajasonn\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\zamajasonn\\InvoiceApp\\InvoiceApp.Core\\obj\\",
+        "outputPath": "c:\\Repos\\InvoiceApp\\InvoiceApp.Core\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
+          "c:\\Repos\\InvoiceApp\\NuGet.Config",
           "C:\\Users\\zamajasonn\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
@@ -25,10 +26,8 @@
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "C:\\Program Files\\dotnet\\library-packs": {},
-          "https://api.nuget.org/v3/index.json": {},
-          "https://pkgs.dev.azure.com/Derivco/_packaging/LibGet@Local/nuget/v3/index.json": {}
+          "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0": {
@@ -67,23 +66,24 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.200/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.202/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\zamajasonn\\InvoiceApp\\InvoiceApp.Infrastructure\\InvoiceApp.Infrastructure.csproj": {
+    "c:\\Repos\\InvoiceApp\\InvoiceApp.Infrastructure\\InvoiceApp.Infrastructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\zamajasonn\\InvoiceApp\\InvoiceApp.Infrastructure\\InvoiceApp.Infrastructure.csproj",
+        "projectUniqueName": "c:\\Repos\\InvoiceApp\\InvoiceApp.Infrastructure\\InvoiceApp.Infrastructure.csproj",
         "projectName": "InvoiceApp.Infrastructure",
-        "projectPath": "C:\\Users\\zamajasonn\\InvoiceApp\\InvoiceApp.Infrastructure\\InvoiceApp.Infrastructure.csproj",
+        "projectPath": "c:\\Repos\\InvoiceApp\\InvoiceApp.Infrastructure\\InvoiceApp.Infrastructure.csproj",
         "packagesPath": "C:\\Users\\zamajasonn\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\zamajasonn\\InvoiceApp\\InvoiceApp.Infrastructure\\obj\\",
+        "outputPath": "c:\\Repos\\InvoiceApp\\InvoiceApp.Infrastructure\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
+          "c:\\Repos\\InvoiceApp\\NuGet.Config",
           "C:\\Users\\zamajasonn\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
@@ -92,17 +92,15 @@
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "C:\\Program Files\\dotnet\\library-packs": {},
-          "https://api.nuget.org/v3/index.json": {},
-          "https://pkgs.dev.azure.com/Derivco/_packaging/LibGet@Local/nuget/v3/index.json": {}
+          "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\zamajasonn\\InvoiceApp\\InvoiceApp.Core\\InvoiceApp.Core.csproj": {
-                "projectPath": "C:\\Users\\zamajasonn\\InvoiceApp\\InvoiceApp.Core\\InvoiceApp.Core.csproj"
+              "c:\\Repos\\InvoiceApp\\InvoiceApp.Core\\InvoiceApp.Core.csproj": {
+                "projectPath": "c:\\Repos\\InvoiceApp\\InvoiceApp.Core\\InvoiceApp.Core.csproj"
               }
             }
           }
@@ -129,7 +127,7 @@
               "target": "Package",
               "version": "[8.0.0, )"
             },
-            "Microsoft.EntityFrameworkCore.Sqlite": {
+            "Microsoft.EntityFrameworkCore.SqlServer": {
               "target": "Package",
               "version": "[8.0.0, )"
             },
@@ -154,23 +152,24 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.200/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.202/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\zamajasonn\\InvoiceApp\\InvoiceApp.Tests\\InvoiceApp.Tests.csproj": {
+    "c:\\Repos\\InvoiceApp\\InvoiceApp.Tests\\InvoiceApp.Tests.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\zamajasonn\\InvoiceApp\\InvoiceApp.Tests\\InvoiceApp.Tests.csproj",
+        "projectUniqueName": "c:\\Repos\\InvoiceApp\\InvoiceApp.Tests\\InvoiceApp.Tests.csproj",
         "projectName": "InvoiceApp.Tests",
-        "projectPath": "C:\\Users\\zamajasonn\\InvoiceApp\\InvoiceApp.Tests\\InvoiceApp.Tests.csproj",
+        "projectPath": "c:\\Repos\\InvoiceApp\\InvoiceApp.Tests\\InvoiceApp.Tests.csproj",
         "packagesPath": "C:\\Users\\zamajasonn\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\zamajasonn\\InvoiceApp\\InvoiceApp.Tests\\obj\\",
+        "outputPath": "c:\\Repos\\InvoiceApp\\InvoiceApp.Tests\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
+          "c:\\Repos\\InvoiceApp\\NuGet.Config",
           "C:\\Users\\zamajasonn\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
@@ -179,23 +178,21 @@
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "C:\\Program Files\\dotnet\\library-packs": {},
-          "https://api.nuget.org/v3/index.json": {},
-          "https://pkgs.dev.azure.com/Derivco/_packaging/LibGet@Local/nuget/v3/index.json": {}
+          "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\zamajasonn\\InvoiceApp\\InvoiceApp.Core\\InvoiceApp.Core.csproj": {
-                "projectPath": "C:\\Users\\zamajasonn\\InvoiceApp\\InvoiceApp.Core\\InvoiceApp.Core.csproj"
+              "c:\\Repos\\InvoiceApp\\InvoiceApp.Core\\InvoiceApp.Core.csproj": {
+                "projectPath": "c:\\Repos\\InvoiceApp\\InvoiceApp.Core\\InvoiceApp.Core.csproj"
               },
-              "C:\\Users\\zamajasonn\\InvoiceApp\\InvoiceApp.Infrastructure\\InvoiceApp.Infrastructure.csproj": {
-                "projectPath": "C:\\Users\\zamajasonn\\InvoiceApp\\InvoiceApp.Infrastructure\\InvoiceApp.Infrastructure.csproj"
+              "c:\\Repos\\InvoiceApp\\InvoiceApp.Infrastructure\\InvoiceApp.Infrastructure.csproj": {
+                "projectPath": "c:\\Repos\\InvoiceApp\\InvoiceApp.Infrastructure\\InvoiceApp.Infrastructure.csproj"
               },
-              "C:\\Users\\zamajasonn\\InvoiceApp\\InvoiceApp.Web\\InvoiceApp.Web.csproj": {
-                "projectPath": "C:\\Users\\zamajasonn\\InvoiceApp\\InvoiceApp.Web\\InvoiceApp.Web.csproj"
+              "c:\\Repos\\InvoiceApp\\InvoiceApp.Web\\InvoiceApp.Web.csproj": {
+                "projectPath": "c:\\Repos\\InvoiceApp\\InvoiceApp.Web\\InvoiceApp.Web.csproj"
               }
             }
           }
@@ -257,23 +254,24 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.200/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.202/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\zamajasonn\\InvoiceApp\\InvoiceApp.Web\\InvoiceApp.Web.csproj": {
+    "c:\\Repos\\InvoiceApp\\InvoiceApp.Web\\InvoiceApp.Web.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\zamajasonn\\InvoiceApp\\InvoiceApp.Web\\InvoiceApp.Web.csproj",
+        "projectUniqueName": "c:\\Repos\\InvoiceApp\\InvoiceApp.Web\\InvoiceApp.Web.csproj",
         "projectName": "InvoiceApp.Web",
-        "projectPath": "C:\\Users\\zamajasonn\\InvoiceApp\\InvoiceApp.Web\\InvoiceApp.Web.csproj",
+        "projectPath": "c:\\Repos\\InvoiceApp\\InvoiceApp.Web\\InvoiceApp.Web.csproj",
         "packagesPath": "C:\\Users\\zamajasonn\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\zamajasonn\\InvoiceApp\\InvoiceApp.Web\\obj\\",
+        "outputPath": "c:\\Repos\\InvoiceApp\\InvoiceApp.Web\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
+          "c:\\Repos\\InvoiceApp\\NuGet.Config",
           "C:\\Users\\zamajasonn\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
@@ -282,20 +280,18 @@
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "C:\\Program Files\\dotnet\\library-packs": {},
-          "https://api.nuget.org/v3/index.json": {},
-          "https://pkgs.dev.azure.com/Derivco/_packaging/LibGet@Local/nuget/v3/index.json": {}
+          "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\zamajasonn\\InvoiceApp\\InvoiceApp.Core\\InvoiceApp.Core.csproj": {
-                "projectPath": "C:\\Users\\zamajasonn\\InvoiceApp\\InvoiceApp.Core\\InvoiceApp.Core.csproj"
+              "c:\\Repos\\InvoiceApp\\InvoiceApp.Core\\InvoiceApp.Core.csproj": {
+                "projectPath": "c:\\Repos\\InvoiceApp\\InvoiceApp.Core\\InvoiceApp.Core.csproj"
               },
-              "C:\\Users\\zamajasonn\\InvoiceApp\\InvoiceApp.Infrastructure\\InvoiceApp.Infrastructure.csproj": {
-                "projectPath": "C:\\Users\\zamajasonn\\InvoiceApp\\InvoiceApp.Infrastructure\\InvoiceApp.Infrastructure.csproj"
+              "c:\\Repos\\InvoiceApp\\InvoiceApp.Infrastructure\\InvoiceApp.Infrastructure.csproj": {
+                "projectPath": "c:\\Repos\\InvoiceApp\\InvoiceApp.Infrastructure\\InvoiceApp.Infrastructure.csproj"
               }
             }
           }
@@ -322,7 +318,7 @@
               "target": "Package",
               "version": "[8.0.0, )"
             },
-            "Microsoft.EntityFrameworkCore.Sqlite": {
+            "Microsoft.EntityFrameworkCore.SqlServer": {
               "target": "Package",
               "version": "[8.0.0, )"
             },
@@ -350,7 +346,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.200/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.202/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

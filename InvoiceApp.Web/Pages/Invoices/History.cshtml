@@ -23,27 +23,29 @@ else
 {
     @foreach (var invoice in Model.Invoices)
     {
-        <div class="card mb-2">
-            <div class="card-body py-2 px-3">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div>
+        <div class="card mb-3">
+            <div class="card-body py-3 px-3">
+                <div class="row align-items-start">
+                    <div class="col-12 col-md-5">
                         <div class="fw-semibold">@invoice.InvoiceNumber</div>
                         <div class="text-muted small">@invoice.ClientName</div>
                         <div class="text-muted small">@invoice.InvoiceDate.ToString("dd MMM yyyy")</div>
                     </div>
-                    <div class="text-end">
-                        <div class="fw-bold text-primary">R @invoice.TotalAmount.ToString("N2")</div>
-                        <div class="mt-1 d-flex gap-1">
+                    <div class="col-12 col-md-3">
+                        <div class="fw-bold text-primary mt-2 mt-md-0">R @invoice.TotalAmount.ToString("N2")</div>
+                    </div>
+                    <div class="col-12 col-md-4 mt-2 mt-md-0">
+                        <div class="d-flex gap-1 flex-column flex-md-row">
                             <a href="/Invoices/Preview?id=@invoice.Id" class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-eye"></i>
+                                <i class="bi bi-eye"></i><span class="ms-2 d-md-none">Preview</span>
                             </a>
                             <a href="/Invoices/Create?reissueFrom=@invoice.Id" class="btn btn-sm btn-outline-secondary">
-                                <i class="bi bi-arrow-repeat"></i>
+                                <i class="bi bi-arrow-repeat"></i><span class="ms-2 d-md-none">Reissue</span>
                             </a>
                             <form method="post" asp-page-handler="Delete" asp-route-id="@invoice.Id" style="display:inline">
                                 <button class="btn btn-sm btn-outline-danger"
                                         onclick="return confirm('Delete @invoice.InvoiceNumber?')">
-                                    <i class="bi bi-trash"></i>
+                                    <i class="bi bi-trash"></i><span class="ms-2 d-md-none">Delete</span>
                                 </button>
                             </form>
                         </div>
