@@ -11,39 +11,81 @@
     </a>
 </div>
 
+@* Search and Filter Form *@
+<form method="get" class="card mb-4">
+    <div class="card-body">
+        <div class="row g-2">
+            <div class="col-12 col-sm-6">
+                <label class="form-label small">Search (Invoice # or Client)</label>
+                <input type="text" name="searchTerm" class="form-control form-control-sm" 
+                       placeholder="e.g., INV-001 or ABC Corp" value="@Model.SearchTerm" />
+            </div>
+            <div class="col-6 col-sm-3">
+                <label class="form-label small">From Date</label>
+                <input type="date" name="dateFrom" class="form-control form-control-sm" 
+                       value="@Model.DateFrom?.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-6 col-sm-3">
+                <label class="form-label small">To Date</label>
+                <input type="date" name="dateTo" class="form-control form-control-sm" 
+                       value="@Model.DateTo?.ToString("yyyy-MM-dd")" />
+            </div>
+        </div>
+        <div class="row g-2 mt-2">
+            <div class="col-6 col-sm-auto">
+                <button type="submit" class="btn btn-primary btn-sm w-100 w-sm-auto">
+                    <i class="bi bi-search"></i> Search
+                </button>
+            </div>
+            <div class="col-6 col-sm-auto">
+                <a href="/Invoices/History" class="btn btn-outline-secondary btn-sm w-100 w-sm-auto">
+                    <i class="bi bi-arrow-counterclockwise"></i> Clear
+                </a>
+            </div>
+        </div>
+    </div>
+</form>
+
 @if (!Model.Invoices.Any())
 {
     <div class="text-center text-muted mt-5">
         <i class="bi bi-inbox fs-1"></i>
-        <p class="mt-2">No invoices yet.</p>
+        <p class="mt-2">No invoices found.</p>
         <a href="/Invoices/Create" class="btn btn-primary">Create your first invoice</a>
     </div>
 }
 else
 {
+    @* Results info *@
+    <div class="text-muted small mb-2">
+        Page @Model.CurrentPage of @Model.TotalPages
+    </div>
+    
     @foreach (var invoice in Model.Invoices)
     {
-        <div class="card mb-2">
-            <div class="card-body py-2 px-3">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div>
+        <div class="card mb-3">
+            <div class="card-body py-3 px-3">
+                <div class="row align-items-start">
+                    <div class="col-12 col-md-5">
                         <div class="fw-semibold">@invoice.InvoiceNumber</div>
                         <div class="text-muted small">@invoice.ClientName</div>
                         <div class="text-muted small">@invoice.InvoiceDate.ToString("dd MMM yyyy")</div>
                     </div>
-                    <div class="text-end">
-                        <div class="fw-bold text-primary">R @invoice.TotalAmount.ToString("N2")</div>
-                        <div class="mt-1 d-flex gap-1">
+                    <div class="col-12 col-md-3">
+                        <div class="fw-bold text-primary mt-2 mt-md-0">R @invoice.TotalAmount.ToString("N2")</div>
+                    </div>
+                    <div class="col-12 col-md-4 mt-2 mt-md-0">
+                        <div class="d-flex gap-1 flex-column flex-md-row">
                             <a href="/Invoices/Preview?id=@invoice.Id" class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-eye"></i>
+                                <i class="bi bi-eye"></i><span class="ms-2 d-md-none">Preview</span>
                             </a>
                             <a href="/Invoices/Create?reissueFrom=@invoice.Id" class="btn btn-sm btn-outline-secondary">
-                                <i class="bi bi-arrow-repeat"></i>
+                                <i class="bi bi-arrow-repeat"></i><span class="ms-2 d-md-none">Reissue</span>
                             </a>
                             <form method="post" asp-page-handler="Delete" asp-route-id="@invoice.Id" style="display:inline">
                                 <button class="btn btn-sm btn-outline-danger"
                                         onclick="return confirm('Delete @invoice.InvoiceNumber?')">
-                                    <i class="bi bi-trash"></i>
+                                    <i class="bi bi-trash"></i><span class="ms-2 d-md-none">Delete</span>
                                 </button>
                             </form>
                         </div>
@@ -51,5 +93,42 @@ else
                 </div>
             </div>
         </div>
+    }
+    
+    @* Pagination *@
+    @if (Model.TotalPages > 1)
+    {
+        <nav aria-label="Pagination" class="mt-4">
+            <ul class="pagination justify-content-center flex-wrap">
+                <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+                    <a class="page-link" href="/Invoices/History?searchTerm=@Uri.EscapeDataString(Model.SearchTerm ?? "")&dateFrom=@Model.DateFrom?.ToString("yyyy-MM-dd")&dateTo=@Model.DateTo?.ToString("yyyy-MM-dd")&pageNumber=@(Model.CurrentPage - 1)">
+                        <i class="bi bi-chevron-left"></i> Previous
+                    </a>
+                </li>
+                
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    if (i == 1 || i == Model.TotalPages || (i >= Model.CurrentPage - 1 && i <= Model.CurrentPage + 1))
+                    {
+                        if (i > 1 && i < Model.CurrentPage - 1)
+                        {
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        }
+                        
+                        <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                            <a class="page-link" href="/Invoices/History?searchTerm=@Uri.EscapeDataString(Model.SearchTerm ?? "")&dateFrom=@Model.DateFrom?.ToString("yyyy-MM-dd")&dateTo=@Model.DateTo?.ToString("yyyy-MM-dd")&pageNumber=@i">
+                                @i
+                            </a>
+                        </li>
+                    }
+                }
+                
+                <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link" href="/Invoices/History?searchTerm=@Uri.EscapeDataString(Model.SearchTerm ?? "")&dateFrom=@Model.DateFrom?.ToString("yyyy-MM-dd")&dateTo=@Model.DateTo?.ToString("yyyy-MM-dd")&pageNumber=@(Model.CurrentPage + 1)">
+                        Next <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
     }
 }

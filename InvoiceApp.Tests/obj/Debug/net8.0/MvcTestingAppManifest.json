@@ -1,5 +1,5 @@
 {
-  "InvoiceApp.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "C:\\Users\\zamajasonn\\InvoiceApp\\InvoiceApp.Core",
-  "InvoiceApp.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "C:\\Users\\zamajasonn\\InvoiceApp\\InvoiceApp.Infrastructure",
-  "InvoiceApp.Web, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "C:\\Users\\zamajasonn\\InvoiceApp\\InvoiceApp.Web"
+  "InvoiceApp.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "c:\\Repos\\InvoiceApp\\InvoiceApp.Core",
+  "InvoiceApp.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "c:\\Repos\\InvoiceApp\\InvoiceApp.Infrastructure",
+  "InvoiceApp.Web, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "c:\\Repos\\InvoiceApp\\InvoiceApp.Web"
 }
