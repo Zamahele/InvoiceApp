@@ -48,6 +48,23 @@
                     <div class="invalid-feedback">Invoice date is required.</div>
                 </div>
             </div>
+            
+            <!-- Newly Added: Invoice Category -->
+            <div class="row g-2 mb-2">
+                <div class="col-12">
+                    <label class="form-label">Invoice Category</label>
+                    <select asp-for="Invoice.Category" class="form-select" required>
+                        <option value="">-- Select Category --</option>
+                        <option value="General">General</option>
+                        <option value="Maintenance">Maintenance</option>
+                        <option value="Hosting">Hosting</option>
+                        <option value="Development">Development</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <div class="invalid-feedback">Category is required.</div>
+                </div>
+            </div>
+
             <div class="form-check">
                 <input asp-for="Invoice.IsReissue" class="form-check-input" type="checkbox"
                        id="reissueCheck" onchange="toggleReissue(this)" />
@@ -139,97 +156,6 @@
         </div>
     </div>
 
-    <!-- Totals -->
-    <div class="card mb-3">
-        <div class="card-body">
-            <div class="d-flex justify-content-between mb-1">
-                <span>Subtotal</span>
-                <span class="fw-semibold" id="subtotalDisplay">R 0.00</span>
-            </div>
-            <div id="vatDisplay" class="d-flex justify-content-between mb-1 d-none text-muted">
-                <span>VAT (15%)</span>
-                <span id="vatAmount">R 0.00</span>
-            </div>
-            <div id="retentionDisplay" class="d-flex justify-content-between mb-1 d-none text-muted">
-                <span id="retentionLabel">Deposit</span>
-                <span id="retentionAmount">- R 0.00</span>
-            </div>
-            <hr class="my-2" />
-            <div class="d-flex justify-content-between">
-                <span class="fw-bold fs-5">TOTAL DUE</span>
-                <span class="fw-bold fs-5 text-primary" id="totalDisplay">R 0.00</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Advanced Options -->
-    <div class="card mb-3">
-        <div class="card-header" data-bs-toggle="collapse" data-bs-target="#advancedOptions"
-             style="cursor:pointer;">
-            <i class="bi bi-sliders"></i> Advanced Options
-            <i class="bi bi-chevron-down float-end"></i>
-        </div>
-        <div class="collapse" id="advancedOptions">
-            <div class="card-body">
-
-                <!-- VAT Toggle -->
-                <div class="form-check form-switch mb-3">
-                    <input class="form-check-input" type="checkbox" id="vatToggle"
-                           asp-for="Invoice.VATEnabled" onchange="recalculate()" />
-                    <label class="form-check-label" for="vatToggle">Include VAT (15%)</label>
-                    <input asp-for="Invoice.VATRate" type="hidden" value="15" />
-                </div>
-
-                <!-- Retention Toggle -->
-                <div class="form-check form-switch mb-2">
-                    <input class="form-check-input" type="checkbox" id="retentionToggle"
-                           asp-for="Invoice.RetentionEnabled" onchange="toggleRetention(this)" />
-                    <label class="form-check-label" for="retentionToggle">Apply Retention / Deposit</label>
-                </div>
-                <div id="retentionOptions" class="d-none ms-2 mb-3">
-                    <div class="row g-2">
-                        <div class="col-6">
-                            <select asp-for="Invoice.RetentionType" class="form-select form-select-sm"
-                                    onchange="recalculate()">
-                                <option value="Deposit">Deposit</option>
-                                <option value="Holdback">Holdback</option>
-                            </select>
-                        </div>
-                        <div class="col-6">
-                            <div class="input-group input-group-sm">
-                                <input asp-for="Invoice.RetentionPercentage" type="number"
-                                       class="form-control" placeholder="%" min="0" max="100"
-                                       onchange="recalculate()" />
-                                <span class="input-group-text">%</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Rate Library Toggle -->
-                <div class="form-check form-switch mb-2">
-                    <input class="form-check-input" type="checkbox" id="rateLibToggle"
-                           onchange="toggleRateLib(this)" />
-                    <label class="form-check-label" for="rateLibToggle">Use Rate Library</label>
-                </div>
-                <div id="rateLibSection" class="d-none ms-2 mb-2">
-                    <select id="rateLibSelect" class="form-select form-select-sm"
-                            onchange="applyRate(this)">
-                        <option value="">-- Pick a saved rate --</option>
-                        @foreach (var rate in Model.SavedRates)
-                        {
-                            <option value="@rate.Description|@rate.Unit|@rate.Rate">
-                                @rate.Description - R @(rate.Rate.ToString("N2")) / @rate.Unit
-                            </option>
-                        }
-                    </select>
-                    <small class="text-muted">Select to pre-fill next line item</small>
-                </div>
-
-            </div>
-        </div>
-    </div>
-
     <!-- Notes -->
     <div class="card mb-3">
         <div class="card-body">
@@ -244,155 +170,3 @@
     </button>
 
 </form>
-
-@section Scripts {
-<script>
-    let itemIndex = @Model.Items.Count;
-
-    function getItemTemplate(index) {
-        return `
-        <div class="line-item border rounded p-2 mb-2">
-            <div class="mb-2">
-                <label class="form-label small mb-1">Description</label>
-                <input name="Items[${index}].Description" class="form-control form-control" placeholder="Description" />
-            </div>
-            <div class="row g-2 mb-2">
-                <div class="col-12 col-sm-4">
-                    <label class="form-label small mb-1">Unit</label>
-                    <select name="Items[${index}].Unit" class="form-select form-select">
-                        <option value="m2">m2</option>
-                        <option value="m">m (linear)</option>
-                        <option value="m3">m3</option>
-                        <option value="unit">unit</option>
-                        <option value="hours">hours</option>
-                        <option value="lump sum">lump sum</option>
-                        <option value="load">load</option>
-                        <option value="bag">bag</option>
-                    </select>
-                </div>
-                <div class="col-6 col-sm-4">
-                    <label class="form-label small mb-1">Qty</label>
-                    <input name="Items[${index}].Quantity" type="number" step="0.001"
-                           class="form-control form-control qty-input" placeholder="Qty" />
-                </div>
-                <div class="col-6 col-sm-4">
-                    <label class="form-label small mb-1">Rate (R)</label>
-                    <input name="Items[${index}].Rate" type="number" step="0.01"
-                           class="form-control form-control rate-input" placeholder="Rate" />
-                </div>
-            </div>
-            <div class="d-flex justify-content-between align-items-center">
-                <span class="fw-semibold text-primary amount-display">R 0.00</span>
-                <button type="button" class="btn btn-sm btn-outline-danger remove-row" style="min-width: 44px; min-height: 44px;">
-                    <i class="bi bi-trash"></i>
-                </button>
-            </div>
-        </div>`;
-    }
-
-    document.getElementById('addRow').addEventListener('click', function () {
-        document.getElementById('lineItems').insertAdjacentHTML('beforeend', getItemTemplate(itemIndex++));
-        attachListeners();
-    });
-
-    document.addEventListener('click', function (e) {
-        if (e.target.closest('.remove-row')) {
-            e.target.closest('.line-item').remove();
-            recalculate();
-        }
-    });
-
-    function attachListeners() {
-        document.querySelectorAll('.qty-input, .rate-input').forEach(input => {
-            input.removeEventListener('input', recalculate);
-            input.addEventListener('input', recalculate);
-        });
-    }
-
-    function recalculate() {
-        let subtotal = 0;
-        document.querySelectorAll('.line-item').forEach(row => {
-            const qty = parseFloat(row.querySelector('.qty-input')?.value) || 0;
-            const rate = parseFloat(row.querySelector('.rate-input')?.value) || 0;
-            const amount = qty * rate;
-            row.querySelector('.amount-display').textContent = 'R ' + formatNum(amount);
-            subtotal += amount;
-        });
-
-        document.getElementById('subtotalDisplay').textContent = 'R ' + formatNum(subtotal);
-
-        const vatEnabled = document.getElementById('vatToggle')?.checked;
-        const vatRate = 15;
-        const vatAmount = vatEnabled ? Math.round(subtotal * vatRate) / 100 : 0;
-
-        const vatDisplay = document.getElementById('vatDisplay');
-        vatDisplay.classList.toggle('d-none', !vatEnabled);
-        document.getElementById('vatAmount').textContent = 'R ' + formatNum(vatAmount);
-
-        const retEnabled = document.getElementById('retentionToggle')?.checked;
-        const retPct = parseFloat(document.querySelector('[name="Invoice.RetentionPercentage"]')?.value) || 0;
-        const retAmount = retEnabled ? Math.round(subtotal * retPct) / 100 : 0;
-        const retType = document.querySelector('[name="Invoice.RetentionType"]')?.value || 'Deposit';
-
-        const retDisplay = document.getElementById('retentionDisplay');
-        retDisplay.classList.toggle('d-none', !retEnabled);
-        document.getElementById('retentionLabel').textContent = retType;
-        document.getElementById('retentionAmount').textContent = '- R ' + formatNum(retAmount);
-
-        let total = subtotal + vatAmount;
-        if (retEnabled) total -= retAmount;
-
-        document.getElementById('totalDisplay').textContent = 'R ' + formatNum(total);
-    }
-
-    function formatNum(n) {
-        return n.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    }
-
-    function toggleReissue(cb) {
-        document.getElementById('reissueSection').classList.toggle('d-none', !cb.checked);
-    }
-
-    function toggleRetention(cb) {
-        document.getElementById('retentionOptions').classList.toggle('d-none', !cb.checked);
-        recalculate();
-    }
-
-    function toggleRateLib(cb) {
-        document.getElementById('rateLibSection').classList.toggle('d-none', !cb.checked);
-    }
-
-    function applyRate(select) {
-        if (!select.value) return;
-        const parts = select.value.split('|');
-        const lastRow = document.querySelectorAll('.line-item');
-        if (lastRow.length === 0) {
-            document.getElementById('addRow').click();
-        }
-        const rows = document.querySelectorAll('.line-item');
-        const row = rows[rows.length - 1];
-        row.querySelector('[placeholder="Description"]').value = parts[0];
-        const unitSelect = row.querySelector('select');
-        if (unitSelect) {
-            for (let opt of unitSelect.options) {
-                if (opt.value === parts[1]) { opt.selected = true; break; }
-            }
-        }
-        const rateInput = row.querySelector('.rate-input');
-        if (rateInput) { rateInput.value = parts[2]; recalculate(); }
-        select.value = '';
-    }
-
-    attachListeners();
-    recalculate();
-
-    // Bootstrap validation on submit
-    document.getElementById('invoiceForm').addEventListener('submit', function (e) {
-        if (!this.checkValidity()) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-        this.classList.add('was-validated');
-    });
-</script>
-}
