@@ -15,7 +15,7 @@ public class Invoice
     public string? ClientCity { get; set; }
     public string? ClientPostalCode { get; set; }
 
-    // Amounts
+    // Financial data
     public decimal SubTotal { get; set; }
     public bool VATEnabled { get; set; }
     public decimal VATRate { get; set; } = 15;
@@ -25,6 +25,9 @@ public class Invoice
     public decimal RetentionPercentage { get; set; }
     public decimal RetentionAmount { get; set; }
     public decimal TotalAmount { get; set; }
+
+    // New: Invoice Category (e.g., Maintenance, Hosting, Development)
+    public string Category { get; set; } = "General";
 
     public string? Notes { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.Now;
