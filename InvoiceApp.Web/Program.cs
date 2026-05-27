@@ -2,7 +2,6 @@ using InvoiceApp.Infrastructure.Data;
 using InvoiceApp.Infrastructure.Identity;
 using InvoiceApp.Infrastructure.Tenancy;
 using InvoiceApp.Web.Tenancy;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using QuestPDF.Infrastructure;
@@ -41,12 +40,6 @@ builder.Services.AddScoped<CompanyContext>();
 builder.Services.AddScoped<InvoiceApp.Infrastructure.Services.InvoicePdfService>();
 builder.Services.AddScoped<InvoiceApp.Infrastructure.Services.RentReceiptPdfService>();
 builder.Services.AddScoped<InvoiceApp.Infrastructure.Services.IEmailService, InvoiceApp.Infrastructure.Services.EmailService>();
-
-// Data Protection encrypts stored SMTP passwords. Persist the key ring to disk and
-// fix the app name so encrypted values stay readable across restarts/deployments.
-builder.Services.AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(builder.Environment.ContentRootPath, "keys")))
-    .SetApplicationName("InvoiceApp");
 
 builder.Services.AddRazorPages(options =>
 {
