@@ -20,8 +20,8 @@ public class DownloadPdfModel : PageModel
 
         if (invoice == null) return NotFound();
 
-        var company = await _db.CompanySettings.FindAsync(1);
-        var banking = await _db.BankingDetails.FindAsync(1);
+        var company = await _db.CompanySettings.FirstOrDefaultAsync();
+        var banking = await _db.BankingDetails.FirstOrDefaultAsync();
 
         var service = new InvoicePdfService();
         var pdf = service.Generate(invoice, company, banking);

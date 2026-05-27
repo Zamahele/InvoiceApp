@@ -92,7 +92,7 @@ public class RoomsModel : PageModel
 
     public async Task<IActionResult> OnPostEditPropertyAsync()
     {
-        var property = await _db.Properties.FindAsync(EditPropertyId);
+        var property = await _db.Properties.FirstOrDefaultAsync(p => p.Id == EditPropertyId);
         if (property == null) return NotFound();
 
         EditPropertyName = EditPropertyName?.Trim() ?? string.Empty;
@@ -158,7 +158,7 @@ public class RoomsModel : PageModel
 
     public async Task<IActionResult> OnPostEditAsync()
     {
-        var room = await _db.Rooms.FindAsync(EditId);
+        var room = await _db.Rooms.FirstOrDefaultAsync(r => r.Id == EditId);
         if (room == null) return NotFound();
 
         EditName = EditName?.Trim() ?? string.Empty;
@@ -190,7 +190,7 @@ public class RoomsModel : PageModel
 
     public async Task<IActionResult> OnPostToggleAsync(int id)
     {
-        var room = await _db.Rooms.FindAsync(id);
+        var room = await _db.Rooms.FirstOrDefaultAsync(r => r.Id == id);
         if (room == null) return NotFound();
 
         room.IsActive = !room.IsActive;

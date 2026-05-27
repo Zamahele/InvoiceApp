@@ -24,7 +24,7 @@ public class CreateModel : PageModel
 
     public async Task OnGetAsync()
     {
-        Company = await _db.CompanySettings.FindAsync(1);
+        Company = await _db.CompanySettings.FirstOrDefaultAsync();
         SavedRates = await _db.SavedRates.OrderBy(r => r.Description).ToListAsync();
 
         var lastInvoice = await _db.Invoices.OrderByDescending(i => i.Id).FirstOrDefaultAsync();
@@ -51,7 +51,7 @@ public class CreateModel : PageModel
 
         if (!ModelState.IsValid)
         {
-            Company = await _db.CompanySettings.FindAsync(1);
+            Company = await _db.CompanySettings.FirstOrDefaultAsync();
             SavedRates = await _db.SavedRates.OrderBy(r => r.Description).ToListAsync();
             NextInvoiceNumber = Invoice.InvoiceNumber;
             return Page();
