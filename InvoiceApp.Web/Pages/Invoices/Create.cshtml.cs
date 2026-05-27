@@ -46,6 +46,7 @@ public class CreateModel : PageModel
     {
         Invoice.InvoiceNumber = Invoice.InvoiceNumber?.Trim() ?? string.Empty;
         Invoice.ClientName = Invoice.ClientName?.Trim() ?? string.Empty;
+        Invoice.ClientEmail = Invoice.ClientEmail?.Trim();
 
         var validItems = ValidateInvoiceInput();
 

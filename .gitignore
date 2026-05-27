@@ -21,3 +21,6 @@ InvoiceApp.Web/appsettings.Development.json
 
 # Runtime startup error logs
 InvoiceApp.Web/logs/
+
+# Data Protection key ring (encrypts stored SMTP passwords) - never commit
+InvoiceApp.Web/keys/

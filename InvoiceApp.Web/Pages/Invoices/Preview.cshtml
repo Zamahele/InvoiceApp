@@ -426,7 +426,19 @@
        class="btn btn-sm btn-warning fw-semibold">
         <i class="bi bi-download"></i> Download PDF
     </a>
+    <form method="post" asp-page-handler="Email" asp-route-id="@Model.Invoice!.Id" class="m-0">
+        <button type="submit" class="btn btn-sm btn-success fw-semibold">
+            <i class="bi bi-envelope"></i> Email
+        </button>
+    </form>
 </div>
+
+@if (!string.IsNullOrEmpty(Model.StatusMessage))
+{
+    <div class="no-print alert @(Model.StatusIsError ? "alert-danger" : "alert-success") text-center mb-0 py-2 rounded-0">
+        @Model.StatusMessage
+    </div>
+}
 
 <div class="invoice-wrap">
 <div class="invoice-content">

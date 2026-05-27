@@ -1,0 +1,77 @@
+@page
+@model InvoiceApp.Web.Pages.Settings.EmailModel
+@{
+    ViewData["Title"] = "Email Settings";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="fw-bold mb-0">Email Settings</h5>
+    <a href="/Settings" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i></a>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.StatusMessage))
+{
+    <div class="alert alert-success py-2">@Model.StatusMessage</div>
+}
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger py-2 mb-3">
+        <ul class="mb-0">
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@error.ErrorMessage</li>
+            }
+        </ul>
+    </div>
+}
+
+<form method="post">
+    <div class="card mb-3">
+        <div class="card-header fw-semibold"><i class="bi bi-envelope-gear"></i> SMTP (outgoing mail)</div>
+        <div class="card-body">
+            <div class="row g-2 mb-2">
+                <div class="col-8">
+                    <label class="form-label">SMTP Host</label>
+                    <input asp-for="Input.SmtpHost" class="form-control" placeholder="e.g. smtp.gmail.com" />
+                </div>
+                <div class="col-4">
+                    <label class="form-label">Port</label>
+                    <input asp-for="Input.SmtpPort" type="number" class="form-control" />
+                </div>
+            </div>
+            <div class="form-check form-switch mb-3">
+                <input asp-for="Input.UseSsl" class="form-check-input" type="checkbox" />
+                <label class="form-check-label" asp-for="Input.UseSsl">Use SSL/TLS</label>
+            </div>
+            <div class="mb-2">
+                <label class="form-label">Username</label>
+                <input asp-for="Input.Username" class="form-control" autocomplete="username" />
+            </div>
+            <div class="mb-2">
+                <label class="form-label">Password</label>
+                <input asp-for="Input.Password" type="password" class="form-control" autocomplete="new-password"
+                       placeholder="@(Model.HasStoredPassword ? "•••••••• (leave blank to keep current)" : "")" />
+                <div class="form-text">Stored encrypted. @(Model.HasStoredPassword ? "Leave blank to keep the existing password." : "")</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-header fw-semibold"><i class="bi bi-person-badge"></i> Sender</div>
+        <div class="card-body">
+            <div class="mb-2">
+                <label class="form-label">From Name</label>
+                <input asp-for="Input.FromName" class="form-control" placeholder="e.g. BlackTech Empower" />
+            </div>
+            <div class="mb-2">
+                <label class="form-label">From Email</label>
+                <input asp-for="Input.FromEmail" type="email" class="form-control" placeholder="e.g. accounts@yourdomain.co.za" />
+            </div>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100 mb-4">
+        <i class="bi bi-save"></i> Save Email Settings
+    </button>
+</form>

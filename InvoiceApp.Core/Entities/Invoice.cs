@@ -14,6 +14,7 @@ public class Invoice : ITenantOwned
 
     // Bill To
     public string ClientName { get; set; } = string.Empty;
+    public string? ClientEmail { get; set; }
     public string? ClientAddressLine1 { get; set; }
     public string? ClientAddressLine2 { get; set; }
     public string? ClientCity { get; set; }

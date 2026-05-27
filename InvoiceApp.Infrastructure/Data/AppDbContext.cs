@@ -35,6 +35,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<RentPayment> RentPayments => Set<RentPayment>();
     public DbSet<Property> Properties => Set<Property>();
     public DbSet<ErrorLog> ErrorLogs => Set<ErrorLog>();
+    public DbSet<EmailSettings> EmailSettings => Set<EmailSettings>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -118,6 +119,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
         modelBuilder.Entity<Property>().HasQueryFilter(e => !_companyId.HasValue || e.CompanyId == _companyId);
         modelBuilder.Entity<Room>().HasQueryFilter(e => !_companyId.HasValue || e.CompanyId == _companyId);
         modelBuilder.Entity<RentPayment>().HasQueryFilter(e => !_companyId.HasValue || e.CompanyId == _companyId);
+        modelBuilder.Entity<EmailSettings>().HasQueryFilter(e => !_companyId.HasValue || e.CompanyId == _companyId);
         // LineItem isn't tenant-owned directly; match its parent Invoice's filter so the
         // required Invoice->LineItem relationship stays consistent under filtering.
         modelBuilder.Entity<LineItem>().HasQueryFilter(l => !_companyId.HasValue || l.Invoice.CompanyId == _companyId);

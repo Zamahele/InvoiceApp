@@ -89,6 +89,9 @@
                 <div class="invalid-feedback">Client name is required.</div>
             </div>
             <div class="mb-2">
+                <input asp-for="Invoice.ClientEmail" type="email" class="form-control" placeholder="Client email (for sending the invoice)" />
+            </div>
+            <div class="mb-2">
                 <input asp-for="Invoice.ClientAddressLine1" class="form-control" placeholder="Address Line 1" />
             </div>
             <div class="mb-2">
