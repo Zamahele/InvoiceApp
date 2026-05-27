@@ -156,9 +156,10 @@
             color: #b0b8cc;
         }
 
-        /* Line items table */
+        /* Line items table — full width like the header band; the outer columns
+           are padded to 32px so the text stays on the same gridline as the header. */
         .items-section {
-            padding: 0 32px 24px;
+            padding: 0 0 24px;
         }
 
         .items-table {
@@ -167,6 +168,11 @@
             margin-top: 20px;
             font-size: 0.88rem;
         }
+
+        .items-table th:first-child,
+        .items-table td:first-child { padding-left: 32px; }
+        .items-table th:last-child,
+        .items-table td:last-child { padding-right: 32px; }
 
         .items-table thead tr {
             background: #1a1a2e;
@@ -337,7 +343,7 @@
             .items-table tbody td::before { content: none !important; }
 
             /* Restore desktop padding that mobile CSS overrides */
-            .items-section  { padding: 0 32px 24px !important; }
+            .items-section  { padding: 0 0 24px !important; }
             .banking-section { margin: 0 32px 32px !important; }
             .notes-section   { margin: 0 32px 20px !important; }
 
@@ -385,6 +391,9 @@
                 text-align: right;
                 font-size: 0.9rem;
             }
+            /* Cancel the desktop 32px outer-cell padding inside the stacked cards. */
+            .items-table td:first-child { padding-left: 0; }
+            .items-table td:last-child { padding-right: 0; }
             .items-table tbody td::before {
                 content: attr(data-label);
                 font-weight: 600;
