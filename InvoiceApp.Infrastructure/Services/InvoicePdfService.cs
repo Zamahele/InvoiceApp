@@ -320,16 +320,15 @@ public class InvoicePdfService
         var name = companyName.ToUpperInvariant();
         if (name.Length > 20) name = name[..20];
 
+        // QuestPDF's SVG renderer does not support <textPath>, so the curved company
+        // name must be laid out as individual rotated <text> glyphs along the top arc.
+        var arcName = BuildArcText(name, cx: 65, cy: 65, radius: 51, fontSize: 11, charAngleDeg: 8.2);
+
         return $"""
             <svg viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <path id="topArc" d="M 13,65 A 52,52 0 0,1 117,65" fill="none"/>
-                </defs>
                 <circle cx="65" cy="65" r="61" fill="none" stroke="#1a1a2e" stroke-width="3"/>
                 <circle cx="65" cy="65" r="48" fill="none" stroke="#1a1a2e" stroke-width="1.5"/>
-                <text font-size="11" font-weight="800" fill="#1a1a2e" letter-spacing="1">
-                    <textPath href="#topArc" startOffset="50%" text-anchor="middle">{name}</textPath>
-                </text>
+                {arcName}
                 <line x1="24" y1="48" x2="106" y2="48" stroke="#1a1a2e" stroke-width="1"/>
                 <line x1="24" y1="86" x2="106" y2="86" stroke="#1a1a2e" stroke-width="1"/>
                 <text x="65" y="67" text-anchor="middle" font-size="13" font-weight="900" fill="#1a1a2e" letter-spacing="1">ORIGINAL</text>
@@ -337,5 +336,27 @@ public class InvoicePdfService
                 <text x="65" y="103" text-anchor="middle" font-size="8.5" font-weight="600" fill="#1a1a2e" letter-spacing="1.5">{invoiceNumber}</text>
             </svg>
             """;
+    }
+
+    // Places each character of <text> along the top of a circle as a rotated glyph,
+    // centred at 12 o'clock. Used because QuestPDF's SVG engine can't render <textPath>.
+    private static string BuildArcText(string text, double cx, double cy, double radius, double fontSize, double charAngleDeg)
+    {
+        var ci = System.Globalization.CultureInfo.InvariantCulture;
+        var sb = new System.Text.StringBuilder();
+        double start = -(text.Length - 1) * charAngleDeg / 2.0; // centre the string on top
+        for (int i = 0; i < text.Length; i++)
+        {
+            double angDeg = start + i * charAngleDeg;           // degrees from top, clockwise
+            double angRad = angDeg * Math.PI / 180.0;
+            double x = cx + radius * Math.Sin(angRad);
+            double y = cy - radius * Math.Cos(angRad);
+            var ch = System.Net.WebUtility.HtmlEncode(text[i].ToString());
+            sb.Append(
+                $"<text x=\"{x.ToString("0.##", ci)}\" y=\"{y.ToString("0.##", ci)}\" " +
+                $"text-anchor=\"middle\" font-size=\"{fontSize.ToString(ci)}\" font-weight=\"800\" fill=\"#1a1a2e\" " +
+                $"transform=\"rotate({angDeg.ToString("0.##", ci)} {x.ToString("0.##", ci)} {y.ToString("0.##", ci)})\">{ch}</text>");
+        }
+        return sb.ToString();
     }
 }
