@@ -22,10 +22,32 @@ public class CreateModel : PageModel
     public List<SavedRate> SavedRates { get; set; } = new();
     public string NextInvoiceNumber { get; set; } = string.Empty;
 
+    // Unit options are derived from the rate library (SavedRates) rather than hard-coded,
+    // so adding a saved rate with a new unit makes it available with no code change.
+    public List<string> Units { get; set; } = new();
+
+    private static List<string> BuildUnits(IEnumerable<SavedRate> rates)
+    {
+        var units = rates
+            .Select(r => r.Unit?.Trim())
+            .Where(u => !string.IsNullOrWhiteSpace(u))
+            .Select(u => u!)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(u => u, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        // Fallback only when the library is empty, so the dropdown is never blank.
+        if (units.Count == 0)
+            units.AddRange(new[] { "monthly", "hourly" });
+
+        return units;
+    }
+
     public async Task OnGetAsync()
     {
         Company = await _db.CompanySettings.FirstOrDefaultAsync();
         SavedRates = await _db.SavedRates.OrderBy(r => r.Description).ToListAsync();
+        Units = BuildUnits(SavedRates);
 
         var lastInvoice = await _db.Invoices.OrderByDescending(i => i.Id).FirstOrDefaultAsync();
         int nextNum = 1;
@@ -54,6 +76,7 @@ public class CreateModel : PageModel
         {
             Company = await _db.CompanySettings.FirstOrDefaultAsync();
             SavedRates = await _db.SavedRates.OrderBy(r => r.Description).ToListAsync();
+            Units = BuildUnits(SavedRates);
             NextInvoiceNumber = Invoice.InvoiceNumber;
             return Page();
         }

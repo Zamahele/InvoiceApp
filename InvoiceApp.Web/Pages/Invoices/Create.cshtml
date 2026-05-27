@@ -3,11 +3,8 @@
 @{
     ViewData["Title"] = "New Invoice";
 
-    // Unit options shared by the server-rendered rows and the JS row template.
-    var units = new (string Value, string Label)[]
-    {
-        ("monthly", "monthly"), ("hourly", "hourly")
-    };
+    // Unit options come from the rate library (Model.Units, sourced from SavedRates in the DB).
+    var units = Model.Units;
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -144,13 +141,13 @@
                                 <select name="Items[@i].Unit" class="form-select li-unit">
                                     @foreach (var u in units)
                                     {
-                                        if (Model.Items[i].Unit == u.Value)
+                                        if (Model.Items[i].Unit == u)
                                         {
-                                            <option value="@u.Value" selected>@u.Label</option>
+                                            <option value="@u" selected>@u</option>
                                         }
                                         else
                                         {
-                                            <option value="@u.Value">@u.Label</option>
+                                            <option value="@u">@u</option>
                                         }
                                     }
                                 </select>
@@ -216,7 +213,7 @@
                 <select name="Items[0].Unit" class="form-select li-unit">
                     @foreach (var u in units)
                     {
-                        <option value="@u.Value">@u.Label</option>
+                        <option value="@u">@u</option>
                     }
                 </select>
             </div>
