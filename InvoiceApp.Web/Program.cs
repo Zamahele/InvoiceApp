@@ -63,6 +63,12 @@ if (!EF.IsDesignTime)
 {
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
+    // One-time cutover: wipe the legacy single-tenant schema if present so the
+    // multi-tenant migration can apply cleanly. Self-disables after first success.
+    LegacySchemaReset.ResetIfLegacySchemaPresent(db, logger);
+
     db.Database.Migrate();
 }
 
