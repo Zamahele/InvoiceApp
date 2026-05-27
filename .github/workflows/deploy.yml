@@ -89,7 +89,12 @@ jobs:
           echo "Deployment files prepared"
 
       - name: Put site in maintenance mode
+        continue-on-error: true
         run: |
+          # FTP_SERVER may carry a scheme or stray whitespace that the FTP-Deploy
+          # action tolerates but curl rejects ("URL using bad/illegal format").
+          FTP_HOST="$(printf '%s' "${{ secrets.FTP_SERVER }}" | tr -d '[:space:]' | sed -E 's#^ftps?://##')"
+
           cat << 'EOF' > app_offline.htm
           <!doctype html>
           <html>
@@ -104,7 +109,7 @@ jobs:
           curl --fail --ftp-create-dirs \
             -T ./app_offline.htm \
             --user "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
-            "ftp://${{ secrets.FTP_SERVER }}/blacktech.gcweproperty.co.za/wwwroot/app_offline.htm"
+            "ftp://${FTP_HOST}/blacktech.gcweproperty.co.za/wwwroot/app_offline.htm"
 
       - name: Deploy to FTP server
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -122,10 +127,12 @@ jobs:
 
       - name: Remove maintenance mode file
         if: always()
+        continue-on-error: true
         run: |
+          FTP_HOST="$(printf '%s' "${{ secrets.FTP_SERVER }}" | tr -d '[:space:]' | sed -E 's#^ftps?://##')"
           curl --fail --user "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
             --quote "DELE /blacktech.gcweproperty.co.za/wwwroot/app_offline.htm" \
-            "ftp://${{ secrets.FTP_SERVER }}/"
+            "ftp://${FTP_HOST}/"
 
       - name: Deployment Summary
         run: |
