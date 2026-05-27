@@ -534,21 +534,22 @@
     <div class="invoice-stamp">
         @{
             var stampName = (Model.Company?.Name ?? "").ToUpperInvariant();
+            if (stampName.Length > 20) stampName = stampName[..20];
             var invNum    = Model.Invoice.InvoiceNumber;
         }
         <svg viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg" width="130" height="130">
             <defs>
                 <!-- Arc path for company name along top of circle -->
-                <path id="topArc" d="M 9,65 A 56,56 0 0,1 121,65" fill="none"/>
+                <path id="topArc" d="M 13,65 A 52,52 0 0,1 117,65" fill="none"/>
             </defs>
 
             <!-- Outer circle -->
             <circle cx="65" cy="65" r="61" fill="none" stroke="#1a1a2e" stroke-width="3"/>
             <!-- Inner circle -->
-            <circle cx="65" cy="65" r="52" fill="none" stroke="#1a1a2e" stroke-width="1.5"/>
+            <circle cx="65" cy="65" r="48" fill="none" stroke="#1a1a2e" stroke-width="1.5"/>
 
             <!-- Company name curved along top arc -->
-            <text font-size="9" font-weight="700" fill="#1a1a2e" letter-spacing="1.5">
+            <text font-size="11" font-weight="800" fill="#1a1a2e" letter-spacing="1">
                 <textPath href="#topArc" startOffset="50%" text-anchor="middle">@stampName</textPath>
             </text>
 

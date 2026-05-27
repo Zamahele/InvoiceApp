@@ -318,16 +318,16 @@ public class InvoicePdfService
     private static string BuildStampSvg(string companyName, string invoiceNumber)
     {
         var name = companyName.ToUpperInvariant();
-        if (name.Length > 22) name = name[..22];
+        if (name.Length > 20) name = name[..20];
 
         return $"""
             <svg viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg">
                 <defs>
-                    <path id="topArc" d="M 9,65 A 56,56 0 0,1 121,65" fill="none"/>
+                    <path id="topArc" d="M 13,65 A 52,52 0 0,1 117,65" fill="none"/>
                 </defs>
                 <circle cx="65" cy="65" r="61" fill="none" stroke="#1a1a2e" stroke-width="3"/>
-                <circle cx="65" cy="65" r="52" fill="none" stroke="#1a1a2e" stroke-width="1.5"/>
-                <text font-size="9" font-weight="700" fill="#1a1a2e" letter-spacing="1.5">
+                <circle cx="65" cy="65" r="48" fill="none" stroke="#1a1a2e" stroke-width="1.5"/>
+                <text font-size="11" font-weight="800" fill="#1a1a2e" letter-spacing="1">
                     <textPath href="#topArc" startOffset="50%" text-anchor="middle">{name}</textPath>
                 </text>
                 <line x1="24" y1="48" x2="106" y2="48" stroke="#1a1a2e" stroke-width="1"/>
