@@ -31,28 +31,44 @@
     <div class="alert alert-success py-2">@Model.StatusMessage</div>
 }
 
-<form method="post" asp-page-handler="Services" class="mb-3">
+<form method="post" asp-page-handler="Services" class="mb-3" id="servicesForm">
     <div class="card">
         <div class="card-header fw-semibold">
             <i class="bi bi-toggles"></i> Services
         </div>
         <div class="card-body">
             <div class="form-check form-switch mb-2">
-                <input class="form-check-input" type="checkbox" name="enableInvoicing" value="true"
+                <input class="form-check-input service-toggle" type="checkbox" name="enableInvoicing" value="true"
                        id="enableInvoicing" @(Model.InvoicingEnabled ? "checked" : "") />
                 <label class="form-check-label" for="enableInvoicing">Invoicing</label>
             </div>
-            <div class="form-check form-switch mb-3">
-                <input class="form-check-input" type="checkbox" name="enableRentTracking" value="true"
+            <div class="form-check form-switch mb-2">
+                <input class="form-check-input service-toggle" type="checkbox" name="enableRentTracking" value="true"
                        id="enableRentTracking" @(Model.RentTrackingEnabled ? "checked" : "") />
                 <label class="form-check-label" for="enableRentTracking">Rent tracking</label>
             </div>
-            <button type="submit" class="btn btn-outline-primary btn-sm">
-                <i class="bi bi-save"></i> Update services
-            </button>
+            <div class="text-muted small">Changes save automatically.</div>
+            <noscript>
+                <button type="submit" class="btn btn-outline-primary btn-sm mt-2">
+                    <i class="bi bi-save"></i> Update services
+                </button>
+            </noscript>
         </div>
     </div>
 </form>
+
+@section Scripts {
+    <script>
+        // Persist each toggle the moment it changes: submit the form -> server UPDATE ->
+        // redirect -> fresh request rebuilds the company instance, so the nav/state refresh.
+        document.querySelectorAll('.service-toggle').forEach(function (cb) {
+            cb.addEventListener('change', function () {
+                var form = document.getElementById('servicesForm');
+                if (form.requestSubmit) form.requestSubmit(); else form.submit();
+            });
+        });
+    </script>
+}
 
 <form method="post">
     <div class="card mb-3">
