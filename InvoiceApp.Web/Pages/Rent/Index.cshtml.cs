@@ -33,7 +33,7 @@ public class IndexModel : PageModel
     public async Task<IActionResult> OnPostMarkPaidAsync(int id, decimal amountPaid, string? notes)
     {
         NormalizePeriod();
-        var payment = await _db.RentPayments.FindAsync(id);
+        var payment = await _db.RentPayments.FirstOrDefaultAsync(p => p.Id == id);
         if (payment == null)
         {
             ModelState.AddModelError(string.Empty, "Rent payment record not found.");
@@ -68,7 +68,7 @@ public class IndexModel : PageModel
     public async Task<IActionResult> OnPostUndoAsync(int id)
     {
         NormalizePeriod();
-        var payment = await _db.RentPayments.FindAsync(id);
+        var payment = await _db.RentPayments.FirstOrDefaultAsync(p => p.Id == id);
         if (payment != null)
         {
             payment.IsPaid = false;

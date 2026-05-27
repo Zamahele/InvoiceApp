@@ -1,4 +1,8 @@
 using InvoiceApp.Infrastructure.Data;
+using InvoiceApp.Infrastructure.Identity;
+using InvoiceApp.Infrastructure.Tenancy;
+using InvoiceApp.Web.Tenancy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using QuestPDF.Infrastructure;
 
@@ -6,18 +10,58 @@ var builder = WebApplication.CreateBuilder(args);
 
 QuestPDF.Settings.License = LicenseType.Community;
 
-builder.Services.AddRazorPages();
-builder.Services.AddScoped<InvoiceApp.Infrastructure.Services.InvoicePdfService>();
-builder.Services.AddScoped<InvoiceApp.Infrastructure.Services.RentReceiptPdfService>();
-
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services
+    .AddIdentity<ApplicationUser, IdentityRole>(options =>
+    {
+        options.SignIn.RequireConfirmedAccount = false;
+        options.Password.RequiredLength = 8;
+        options.Password.RequireNonAlphanumeric = false;
+        options.User.RequireUniqueEmail = true;
+    })
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddClaimsPrincipalFactory<AppUserClaimsPrincipalFactory>()
+    .AddDefaultTokenProviders();
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Account/Login";
+    options.LogoutPath = "/Account/Logout";
+    options.AccessDeniedPath = "/Account/Login";
+});
+
+// Tenant resolution: current company id (from the user's claim) + the loaded Company.
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentCompanyProvider, CurrentCompanyProvider>();
+builder.Services.AddScoped<CompanyContext>();
+
+builder.Services.AddScoped<InvoiceApp.Infrastructure.Services.InvoicePdfService>();
+builder.Services.AddScoped<InvoiceApp.Infrastructure.Services.RentReceiptPdfService>();
+
+builder.Services.AddRazorPages(options =>
+{
+    // Everything requires a signed-in company except the auth + error pages.
+    options.Conventions.AuthorizeFolder("/");
+    options.Conventions.AllowAnonymousToFolder("/Account");
+    options.Conventions.AllowAnonymousToPage("/Error");
+    options.Conventions.AllowAnonymousToPage("/Offline");
+    options.Conventions.AllowAnonymousToPage("/Privacy");
+
+    // Feature gating: only companies that enabled a service can reach its pages.
+    options.Conventions.AddFolderApplicationModelConvention("/Invoices",
+        model => model.Filters.Add(new RequireServiceFilter(Service.Invoicing)));
+    options.Conventions.AddFolderApplicationModelConvention("/Rent",
+        model => model.Filters.Add(new RequireServiceFilter(Service.RentTracking)));
+});
+
 var app = builder.Build();
 
-// Apply pending migrations on startup
-using (var scope = app.Services.CreateScope())
+// Apply pending migrations on startup (skipped under EF design-time tooling).
+if (!EF.IsDesignTime)
 {
+    using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.Migrate();
 }
@@ -31,6 +75,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapRazorPages();
 

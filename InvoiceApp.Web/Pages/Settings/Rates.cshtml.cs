@@ -49,7 +49,7 @@ public class RatesModel : PageModel
 
     public async Task<IActionResult> OnPostDeleteAsync(int id)
     {
-        var rate = await _db.SavedRates.FindAsync(id);
+        var rate = await _db.SavedRates.FirstOrDefaultAsync(r => r.Id == id);
         if (rate != null)
         {
             _db.SavedRates.Remove(rate);

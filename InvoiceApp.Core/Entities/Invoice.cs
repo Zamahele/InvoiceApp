@@ -1,8 +1,12 @@
 namespace InvoiceApp.Core.Entities;
 
-public class Invoice
+public class Invoice : ITenantOwned
 {
     public int Id { get; set; }
+
+    public int CompanyId { get; set; }
+    public Company? Company { get; set; }
+
     public string InvoiceNumber { get; set; } = string.Empty;
     public DateTime InvoiceDate { get; set; }
     public bool IsReissue { get; set; }

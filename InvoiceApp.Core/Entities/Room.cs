@@ -1,8 +1,12 @@
 namespace InvoiceApp.Core.Entities;
 
-public class Room
+public class Room : ITenantOwned
 {
     public int Id { get; set; }
+
+    public int CompanyId { get; set; }
+    public Company? Company { get; set; }
+
     public string Name { get; set; } = string.Empty;
     public string TenantName { get; set; } = string.Empty;
     public string TenantPhone { get; set; } = string.Empty;

@@ -24,8 +24,8 @@ public class PreviewModel : PageModel
 
         if (Invoice == null) return NotFound();
 
-        Company = await _db.CompanySettings.FindAsync(1);
-        Banking = await _db.BankingDetails.FindAsync(1);
+        Company = await _db.CompanySettings.FirstOrDefaultAsync();
+        Banking = await _db.BankingDetails.FirstOrDefaultAsync();
 
         return Page();
     }

@@ -1,5 +1,7 @@
+using System.Security.Claims;
 using InvoiceApp.Core.Entities;
 using InvoiceApp.Infrastructure.Data;
+using InvoiceApp.Web.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +20,10 @@ public class IndexModel : PageModel
     [BindProperty]
     public BankingDetails Banking { get; set; } = new();
 
+    // Service subscription state for the current tenant.
+    public bool InvoicingEnabled { get; set; }
+    public bool RentTrackingEnabled { get; set; }
+
     [TempData]
     public string? StatusMessage { get; set; }
 
@@ -25,6 +31,38 @@ public class IndexModel : PageModel
     {
         Company = await _db.CompanySettings.FirstOrDefaultAsync() ?? new CompanySettings();
         Banking = await _db.BankingDetails.FirstOrDefaultAsync() ?? new BankingDetails();
+
+        var tenant = await GetTenantAsync();
+        InvoicingEnabled = tenant?.InvoicingEnabled ?? false;
+        RentTrackingEnabled = tenant?.RentTrackingEnabled ?? false;
+    }
+
+    public async Task<IActionResult> OnPostServicesAsync(bool enableInvoicing, bool enableRentTracking)
+    {
+        if (!enableInvoicing && !enableRentTracking)
+        {
+            TempData["StatusMessage"] = "Select at least one service.";
+            return RedirectToPage();
+        }
+
+        var tenant = await GetTenantAsync();
+        if (tenant != null)
+        {
+            tenant.InvoicingEnabled = enableInvoicing;
+            tenant.RentTrackingEnabled = enableRentTracking;
+            await _db.SaveChangesAsync();
+            TempData["StatusMessage"] = "Services updated.";
+        }
+
+        return RedirectToPage();
+    }
+
+    private async Task<Company?> GetTenantAsync()
+    {
+        var claim = User.FindFirstValue(CurrentCompanyProvider.CompanyIdClaim);
+        return int.TryParse(claim, out var id)
+            ? await _db.Companies.FindAsync(id)
+            : null;
     }
 
     public async Task<IActionResult> OnPostAsync()
