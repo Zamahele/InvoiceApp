@@ -65,11 +65,31 @@ if (!EF.IsDesignTime)
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
-    // One-time cutover: wipe the legacy single-tenant schema if present so the
-    // multi-tenant migration can apply cleanly. Self-disables after first success.
-    LegacySchemaReset.ResetIfLegacySchemaPresent(db, logger);
+    try
+    {
+        // One-time cutover: wipe the legacy single-tenant schema if present so the
+        // multi-tenant migration can apply cleanly. Self-disables after first success.
+        LegacySchemaReset.ResetIfLegacySchemaPresent(db, logger);
 
-    db.Database.Migrate();
+        db.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        // Startup DB failures otherwise surface only as an opaque HTTP 500.30.
+        // Write the full exception to a retrievable file (logs/ is FTP-only) and
+        // log it, then rethrow so the failure is not silently swallowed.
+        logger.LogCritical(ex, "Startup database initialization failed.");
+        try
+        {
+            var logDir = Path.Combine(app.Environment.ContentRootPath, "logs");
+            Directory.CreateDirectory(logDir);
+            File.WriteAllText(
+                Path.Combine(logDir, "startup-error.log"),
+                $"{DateTime.UtcNow:o}{Environment.NewLine}{ex}");
+        }
+        catch { /* never mask the original failure */ }
+        throw;
+    }
 }
 
 if (!app.Environment.IsDevelopment())
