@@ -14,13 +14,27 @@ public class RatesModel : PageModel
 
     public List<SavedRate> Rates { get; set; } = new();
 
+    // Autocomplete hints for the Unit field — existing units plus common defaults.
+    // The field is free-text, so any new unit can still be entered.
+    public List<string> UnitSuggestions { get; set; } = new();
+
     [BindProperty]
     public SavedRate NewRate { get; set; } = new();
 
     public async Task OnGetAsync()
     {
         Rates = await _db.SavedRates.OrderBy(r => r.Description).ToListAsync();
+        UnitSuggestions = BuildUnitSuggestions(Rates);
     }
+
+    private static List<string> BuildUnitSuggestions(IEnumerable<SavedRate> rates) =>
+        new[] { "monthly", "hourly" }
+            .Concat(rates.Select(r => r.Unit))
+            .Where(u => !string.IsNullOrWhiteSpace(u))
+            .Select(u => u!.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(u => u, StringComparer.OrdinalIgnoreCase)
+            .ToList();
 
     public async Task<IActionResult> OnPostAddAsync()
     {
@@ -39,6 +53,7 @@ public class RatesModel : PageModel
         if (!ModelState.IsValid)
         {
             Rates = await _db.SavedRates.OrderBy(r => r.Description).ToListAsync();
+            UnitSuggestions = BuildUnitSuggestions(Rates);
             return Page();
         }
 
