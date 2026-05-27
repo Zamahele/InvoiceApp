@@ -410,7 +410,7 @@ namespace InvoiceApp.Infrastructure.Migrations
                 principalSchema: "blacktech",
                 principalTable: "Companies",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_SavedRates_Companies_CompanyId",

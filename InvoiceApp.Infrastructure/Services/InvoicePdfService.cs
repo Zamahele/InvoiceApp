@@ -194,7 +194,7 @@ public class InvoicePdfService
 
                             table.Cell().Background(bg).BorderBottom(1).BorderColor("#eeeeee")
                                 .PaddingVertical(8).PaddingHorizontal(8).AlignRight()
-                                .Text(isLump ? "-" : item.Quantity.ToString("G")).FontSize(9);
+                                .Text(isLump ? "-" : item.Quantity.ToString("0.####")).FontSize(9);
 
                             table.Cell().Background(bg).BorderBottom(1).BorderColor("#eeeeee")
                                 .PaddingVertical(8).PaddingHorizontal(8)

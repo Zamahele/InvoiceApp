@@ -448,7 +448,7 @@
                         <td>
                             <div class="item-desc">@item.Description</div>
                         </td>
-                        <td class="text-end">@(item.Unit == "lump sum" ? "-" : item.Quantity.ToString("G"))</td>
+                        <td class="text-end">@(item.Unit == "lump sum" ? "-" : item.Quantity.ToString("0.####"))</td>
                         <td>@item.Unit</td>
                         <td class="text-end">@(item.Unit == "lump sum" ? "-" : item.Rate.ToString("N2"))</td>
                         <td class="text-end fw-semibold">@item.Amount.ToString("N2")</td>

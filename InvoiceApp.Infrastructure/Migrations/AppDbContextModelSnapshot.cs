@@ -714,7 +714,7 @@ namespace InvoiceApp.Infrastructure.Migrations
                     b.HasOne("InvoiceApp.Core.Entities.Company", "Company")
                         .WithMany()
                         .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("InvoiceApp.Core.Entities.Property", "Property")

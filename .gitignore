@@ -15,3 +15,9 @@ obj/
 # .NET
 *.suo
 .DS_Store
+
+# Local dev secrets (connection strings) - never commit
+InvoiceApp.Web/appsettings.Development.json
+
+# Runtime startup error logs
+InvoiceApp.Web/logs/

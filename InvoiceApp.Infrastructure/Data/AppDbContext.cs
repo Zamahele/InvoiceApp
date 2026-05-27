@@ -9,14 +9,20 @@ namespace InvoiceApp.Infrastructure.Data;
 
 public class AppDbContext : IdentityDbContext<ApplicationUser>
 {
-    // Null when there is no signed-in tenant (startup migrations, tests). In that
-    // case tenant query filters are bypassed and inserts are left unstamped.
-    private readonly int? _companyId;
+    private readonly ICurrentCompanyProvider? _currentCompany;
+
+    // Resolved lazily on each access, not cached in the constructor: the context can
+    // be created before the request is authenticated (e.g. Identity cookie validation
+    // resolves it during AuthenticationMiddleware), at which point the CompanyId claim
+    // isn't set yet. Reading live ensures SaveChanges stamping and query filters see
+    // the signed-in tenant. Null when there is no signed-in tenant (startup migrations,
+    // tests) — in that case query filters are bypassed and inserts are left unstamped.
+    private int? _companyId => _currentCompany?.CompanyId;
 
     public AppDbContext(DbContextOptions<AppDbContext> options, ICurrentCompanyProvider? currentCompany = null)
         : base(options)
     {
-        _companyId = currentCompany?.CompanyId;
+        _currentCompany = currentCompany;
     }
 
     public DbSet<Company> Companies => Set<Company>();
@@ -51,6 +57,14 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             .WithMany(p => p.Rooms)
             .HasForeignKey(r => r.PropertyId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        // Avoid a second cascade path to Room: Company -> Property -> Room is SET NULL,
+        // so Company -> Room must not also cascade. SQL Server rejects multiple cascade paths.
+        modelBuilder.Entity<Room>()
+            .HasOne(r => r.Company)
+            .WithMany()
+            .HasForeignKey(r => r.CompanyId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<RentPayment>(b =>
         {

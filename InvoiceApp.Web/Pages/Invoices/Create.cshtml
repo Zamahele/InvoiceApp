@@ -2,6 +2,12 @@
 @model InvoiceApp.Web.Pages.Invoices.CreateModel
 @{
     ViewData["Title"] = "New Invoice";
+
+    // Unit options shared by the server-rendered rows and the JS row template.
+    var units = new (string Value, string Label)[]
+    {
+        ("monthly", "monthly"), ("hourly", "hourly")
+    };
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -48,20 +54,17 @@
                     <div class="invalid-feedback">Invoice date is required.</div>
                 </div>
             </div>
-            
-            <!-- Newly Added: Invoice Category -->
+
             <div class="row g-2 mb-2">
                 <div class="col-12">
-                    <label class="form-label">Invoice Category</label>
-                    <select asp-for="Invoice.Category" class="form-select" required>
-                        <option value="">-- Select Category --</option>
+                    <label class="form-label">Category <span class="text-muted small">(optional)</span></label>
+                    <select asp-for="Invoice.Category" class="form-select">
                         <option value="General">General</option>
                         <option value="Maintenance">Maintenance</option>
                         <option value="Hosting">Hosting</option>
                         <option value="Development">Development</option>
                         <option value="Other">Other</option>
                     </select>
-                    <div class="invalid-feedback">Category is required.</div>
                 </div>
             </div>
 
@@ -70,7 +73,7 @@
                        id="reissueCheck" onchange="toggleReissue(this)" />
                 <label class="form-check-label" for="reissueCheck">Re-issue Invoice</label>
             </div>
-            <div id="reissueSection" class="mt-2 d-none">
+            <div id="reissueSection" class="mt-2 @(Model.Invoice.IsReissue ? "" : "d-none")">
                 <label class="form-label">Re-issue Date</label>
                 <input asp-for="Invoice.ReissueDate" type="date" class="form-control" />
             </div>
@@ -106,43 +109,65 @@
     <div class="card mb-3">
         <div class="card-header fw-semibold"><i class="bi bi-list-ul"></i> Line Items</div>
         <div class="card-body p-2">
+
+            @if (Model.SavedRates.Any())
+            {
+                <div class="mb-2">
+                    <label class="form-label small mb-1">Add a saved item</label>
+                    <select id="savedRatePicker" class="form-select">
+                        <option value="">+ Add saved rate…</option>
+                        @foreach (var r in Model.SavedRates)
+                        {
+                            <option value="@r.Description" data-unit="@r.Unit" data-rate="@(r.Rate.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))">
+                                @r.Description — R@(r.Rate.ToString("0.00")) / @r.Unit
+                            </option>
+                        }
+                    </select>
+                </div>
+                <hr class="my-2" />
+            }
+
             <div id="lineItems">
                 @for (int i = 0; i < Model.Items.Count; i++)
                 {
                     <div class="line-item border rounded p-2 mb-2">
                         <div class="mb-2">
-                            <label class="form-label small mb-1">Description</label>
-                            <input name="Items[@i].Description" class="form-control form-control"
-                                   placeholder="Description" />
+                            <input name="Items[@i].Description" class="form-control li-desc"
+                                   value="@Model.Items[i].Description" placeholder="Description" />
                         </div>
                         <div class="row g-2 mb-2">
                             <div class="col-12 col-sm-4">
                                 <label class="form-label small mb-1">Unit</label>
-                                <select name="Items[@i].Unit" class="form-select form-select">
-                                    <option value="m2">m2</option>
-                                    <option value="m">m (linear)</option>
-                                    <option value="m3">m3</option>
-                                    <option value="unit">unit</option>
-                                    <option value="hours">hours</option>
-                                    <option value="lump sum">lump sum</option>
-                                    <option value="load">load</option>
-                                    <option value="bag">bag</option>
+                                <select name="Items[@i].Unit" class="form-select li-unit">
+                                    @foreach (var u in units)
+                                    {
+                                        if (Model.Items[i].Unit == u.Value)
+                                        {
+                                            <option value="@u.Value" selected>@u.Label</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@u.Value">@u.Label</option>
+                                        }
+                                    }
                                 </select>
                             </div>
                             <div class="col-6 col-sm-4">
                                 <label class="form-label small mb-1">Qty</label>
                                 <input name="Items[@i].Quantity" type="number" step="0.001"
-                                       class="form-control form-control qty-input" placeholder="Qty" />
+                                       class="form-control li-qty" placeholder="Qty"
+                                       value="@(Model.Items[i].Quantity == 0 ? "" : Model.Items[i].Quantity.ToString(System.Globalization.CultureInfo.InvariantCulture))" />
                             </div>
                             <div class="col-6 col-sm-4">
                                 <label class="form-label small mb-1">Rate (R)</label>
                                 <input name="Items[@i].Rate" type="number" step="0.01"
-                                       class="form-control form-control rate-input" placeholder="Rate" />
+                                       class="form-control li-rate" placeholder="Rate"
+                                       value="@(Model.Items[i].Rate == 0 ? "" : Model.Items[i].Rate.ToString(System.Globalization.CultureInfo.InvariantCulture))" />
                             </div>
                         </div>
                         <div class="d-flex justify-content-between align-items-center">
-                            <span class="fw-semibold text-primary amount-display">R 0.00</span>
-                            <button type="button" class="btn btn-sm btn-outline-danger remove-row" style="min-width: 44px; min-height: 44px;">
+                            <span class="fw-semibold text-primary li-amount">R 0.00</span>
+                            <button type="button" class="btn btn-sm btn-outline-danger li-remove" style="min-width: 44px; min-height: 44px;">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </div>
@@ -150,9 +175,14 @@
                 }
             </div>
 
-            <button type="button" class="btn btn-outline-primary w-100 mt-2" id="addRow" style="min-height: 44px;">
-                <i class="bi bi-plus-circle"></i> Add Line Item
+            <button type="button" class="btn btn-outline-primary w-100 mt-2" id="addBlankRow" style="min-height: 44px;">
+                <i class="bi bi-plus-circle"></i> Add blank line (manual)
             </button>
+
+            <div class="d-flex justify-content-between align-items-center mt-3 px-1">
+                <span class="text-muted small">Items total (excl. VAT)</span>
+                <span class="fw-bold" id="liTotal">R 0.00</span>
+            </div>
         </div>
     </div>
 
@@ -170,3 +200,123 @@
     </button>
 
 </form>
+
+<!-- Row template cloned by JS for new / saved-rate lines -->
+<template id="rowTemplate">
+    <div class="line-item border rounded p-2 mb-2">
+        <div class="mb-2">
+            <input name="Items[0].Description" class="form-control li-desc" placeholder="Description" />
+        </div>
+        <div class="row g-2 mb-2">
+            <div class="col-12 col-sm-4">
+                <label class="form-label small mb-1">Unit</label>
+                <select name="Items[0].Unit" class="form-select li-unit">
+                    @foreach (var u in units)
+                    {
+                        <option value="@u.Value">@u.Label</option>
+                    }
+                </select>
+            </div>
+            <div class="col-6 col-sm-4">
+                <label class="form-label small mb-1">Qty</label>
+                <input name="Items[0].Quantity" type="number" step="0.001" class="form-control li-qty" placeholder="Qty" />
+            </div>
+            <div class="col-6 col-sm-4">
+                <label class="form-label small mb-1">Rate (R)</label>
+                <input name="Items[0].Rate" type="number" step="0.01" class="form-control li-rate" placeholder="Rate" />
+            </div>
+        </div>
+        <div class="d-flex justify-content-between align-items-center">
+            <span class="fw-semibold text-primary li-amount">R 0.00</span>
+            <button type="button" class="btn btn-sm btn-outline-danger li-remove" style="min-width: 44px; min-height: 44px;">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+    </div>
+</template>
+
+@section Scripts {
+    <script>
+        function toggleReissue(cb) {
+            document.getElementById('reissueSection').classList.toggle('d-none', !cb.checked);
+        }
+
+        (function () {
+            const container = document.getElementById('lineItems');
+            const template = document.getElementById('rowTemplate');
+            const picker = document.getElementById('savedRatePicker');
+
+            // Model binding needs Items[0..n] with no gaps; renumber after every add/remove.
+            function reindex() {
+                container.querySelectorAll('.line-item').forEach((row, i) => {
+                    row.querySelectorAll('[name]').forEach(el => {
+                        el.name = el.name.replace(/Items\[\d+\]/, 'Items[' + i + ']');
+                    });
+                });
+            }
+
+            function rowAmount(row) {
+                const qty = parseFloat(row.querySelector('.li-qty').value) || 0;
+                const rate = parseFloat(row.querySelector('.li-rate').value) || 0;
+                return qty * rate;
+            }
+
+            function recalc() {
+                let total = 0;
+                container.querySelectorAll('.line-item').forEach(row => {
+                    const amt = rowAmount(row);
+                    row.querySelector('.li-amount').textContent = 'R ' + amt.toFixed(2);
+                    total += amt;
+                });
+                document.getElementById('liTotal').textContent = 'R ' + total.toFixed(2);
+            }
+
+            function wireRow(row) {
+                row.querySelectorAll('.li-qty, .li-rate').forEach(inp =>
+                    inp.addEventListener('input', recalc));
+                row.querySelector('.li-remove').addEventListener('click', () => {
+                    row.remove();
+                    reindex();
+                    recalc();
+                });
+            }
+
+            function addRow(values) {
+                const node = template.content.firstElementChild.cloneNode(true);
+                if (values) {
+                    if (values.desc != null) node.querySelector('.li-desc').value = values.desc;
+                    if (values.unit) {
+                        const unitSel = node.querySelector('.li-unit');
+                        // Match case-insensitively so a saved unit like "Monthly" still maps to "monthly".
+                        const match = [...unitSel.options].find(o => o.value.toLowerCase() === values.unit.toLowerCase());
+                        if (match) unitSel.value = match.value;
+                    }
+                    node.querySelector('.li-qty').value = values.qty != null ? values.qty : 1;
+                    if (values.rate != null) node.querySelector('.li-rate').value = values.rate;
+                }
+                container.appendChild(node);
+                wireRow(node);
+                reindex();
+                recalc();
+                return node;
+            }
+
+            // Wire any server-rendered rows (initial row, or rows kept after a validation error).
+            container.querySelectorAll('.line-item').forEach(wireRow);
+            // Always have at least one row to type into.
+            if (!container.querySelector('.line-item')) addRow();
+            recalc();
+
+            document.getElementById('addBlankRow').addEventListener('click', () => addRow());
+
+            if (picker) {
+                picker.addEventListener('change', () => {
+                    const opt = picker.selectedOptions[0];
+                    if (!opt || !opt.value) return;
+                    addRow({ desc: opt.value, unit: opt.dataset.unit, rate: opt.dataset.rate, qty: 1 });
+                    picker.value = '';
+                });
+            }
+        })();
+    </script>
+}
