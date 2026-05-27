@@ -134,7 +134,32 @@ jobs:
             --quote "DELE /blacktech.gcweproperty.co.za/wwwroot/app_offline.htm" \
             "ftp://${FTP_HOST}/"
 
+      - name: Verify application startup
+        run: |
+          # Smoke test: confirm the app actually starts after deploy. A startup
+          # failure (e.g. a migration throwing -> HTTP 500.30) shows up as a 5xx
+          # or an unreachable host. Any response < 500 means the app pipeline
+          # booted. Retry to allow cold start + EF migrations to complete.
+          URL="http://blacktech.gcweproperty.co.za/wwwroot/"
+          ATTEMPTS=12
+          DELAY=15
+          CODE="000"
+          echo "Health check: $URL"
+          for i in $(seq 1 "$ATTEMPTS"); do
+            CODE="$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$URL" || echo 000)"
+            echo "Attempt $i/$ATTEMPTS -> HTTP $CODE"
+            if [ "$CODE" != "000" ] && [ "$CODE" -lt 500 ]; then
+              echo "Application is up (HTTP $CODE)."
+              exit 0
+            fi
+            echo "Not ready yet (HTTP $CODE); waiting ${DELAY}s..."
+            sleep "$DELAY"
+          done
+          echo "::error::Application did not start cleanly after deploy (last response: HTTP $CODE)."
+          exit 1
+
       - name: Deployment Summary
+        if: success()
         run: |
           echo "========================================="
           echo "INVOICEAPP DEPLOYMENT COMPLETED"
