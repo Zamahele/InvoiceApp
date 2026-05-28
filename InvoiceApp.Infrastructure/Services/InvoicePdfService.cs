@@ -330,12 +330,12 @@ public class InvoicePdfService
                 <circle cx="65" cy="65" r="61" fill="none" stroke="#1a1a2e" stroke-width="3"/>
                 <circle cx="65" cy="65" r="48" fill="none" stroke="#1a1a2e" stroke-width="1.5"/>
                 {arcName}
-                <line x1="24" y1="48" x2="106" y2="48" stroke="#1a1a2e" stroke-width="1"/>
-                <line x1="24" y1="86" x2="106" y2="86" stroke="#1a1a2e" stroke-width="1"/>
-                <text x="65" y="67" text-anchor="middle" font-size="13" font-weight="900" fill="#1a1a2e" letter-spacing="1">ORIGINAL</text>
-                <text x="65" y="82" text-anchor="middle" font-size="11" font-weight="700" fill="#1a1a2e" letter-spacing="1">INVOICE</text>
-                <text x="65" y="100" text-anchor="middle" font-size="9" font-weight="700" fill="#1a1a2e" letter-spacing="1.2">{dateText}</text>
-                <text x="65" y="112" text-anchor="middle" font-size="7.5" font-weight="600" fill="#1a1a2e" letter-spacing="1.2">{invoiceNumber}</text>
+                <line x1="24" y1="46" x2="106" y2="46" stroke="#1a1a2e" stroke-width="1"/>
+                <line x1="24" y1="92" x2="106" y2="92" stroke="#1a1a2e" stroke-width="1"/>
+                <text x="65" y="58" text-anchor="middle" font-size="8" font-weight="700" fill="#1a1a2e" letter-spacing="1.5">{invoiceNumber}</text>
+                <text x="65" y="74" text-anchor="middle" font-size="13" font-weight="900" fill="#1a1a2e" letter-spacing="1">ORIGINAL</text>
+                <text x="65" y="88" text-anchor="middle" font-size="11" font-weight="700" fill="#1a1a2e" letter-spacing="1">INVOICE</text>
+                <text x="65" y="106" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1a1a2e" letter-spacing="1.2">{dateText}</text>
             </svg>
             """;
     }
