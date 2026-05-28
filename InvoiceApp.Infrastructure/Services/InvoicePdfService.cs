@@ -27,7 +27,7 @@ public class InvoicePdfService
                 page.DefaultTextStyle(x => x.FontSize(9).FontFamily("Arial").FontColor(Body));
 
                 // Stamp - same SVG as HTML preview, bottom right corner
-                var stampSvg = BuildStampSvg(companyName, invoice.InvoiceNumber);
+                var stampSvg = BuildStampSvg(companyName, invoice.InvoiceNumber, invoice.InvoiceDate);
                 var stampImage = SvgImage.FromText(stampSvg);
 
                 page.Foreground()
@@ -315,10 +315,11 @@ public class InvoicePdfService
         return document.GeneratePdf();
     }
 
-    private static string BuildStampSvg(string companyName, string invoiceNumber)
+    private static string BuildStampSvg(string companyName, string invoiceNumber, DateTime invoiceDate)
     {
         var name = companyName.ToUpperInvariant();
         if (name.Length > 20) name = name[..20];
+        var dateText = invoiceDate.ToString("dd MMM yyyy", System.Globalization.CultureInfo.InvariantCulture).ToUpperInvariant();
 
         // QuestPDF's SVG renderer does not support <textPath>, so the curved company
         // name must be laid out as individual rotated <text> glyphs along the top arc.
@@ -333,7 +334,8 @@ public class InvoicePdfService
                 <line x1="24" y1="86" x2="106" y2="86" stroke="#1a1a2e" stroke-width="1"/>
                 <text x="65" y="67" text-anchor="middle" font-size="13" font-weight="900" fill="#1a1a2e" letter-spacing="1">ORIGINAL</text>
                 <text x="65" y="82" text-anchor="middle" font-size="11" font-weight="700" fill="#1a1a2e" letter-spacing="1">INVOICE</text>
-                <text x="65" y="103" text-anchor="middle" font-size="8.5" font-weight="600" fill="#1a1a2e" letter-spacing="1.5">{invoiceNumber}</text>
+                <text x="65" y="100" text-anchor="middle" font-size="9" font-weight="700" fill="#1a1a2e" letter-spacing="1.2">{dateText}</text>
+                <text x="65" y="112" text-anchor="middle" font-size="7.5" font-weight="600" fill="#1a1a2e" letter-spacing="1.2">{invoiceNumber}</text>
             </svg>
             """;
     }
