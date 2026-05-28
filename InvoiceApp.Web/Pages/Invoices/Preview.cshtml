@@ -652,19 +652,19 @@
                 <textPath href="#topArc" startOffset="50%" text-anchor="middle">@stampName</textPath>
             </text>
 
-            <!-- Horizontal dividers -->
-            <line x1="24" y1="46" x2="106" y2="46" stroke="#1a1a2e" stroke-width="1"/>
-            <line x1="24" y1="92" x2="106" y2="92" stroke="#1a1a2e" stroke-width="1"/>
+            <!-- Invoice number above the top divider, in the band below the company arc -->
+            <text x="65" y="42" text-anchor="middle" font-size="8.5" font-weight="700" fill="#1a1a2e" letter-spacing="1.5">@invNum</text>
 
-            <!-- Invoice number above ORIGINAL INVOICE -->
-            <text x="65" y="58" text-anchor="middle" font-size="8" font-weight="700" fill="#1a1a2e" letter-spacing="1.5">@invNum</text>
+            <!-- Horizontal dividers -->
+            <line x1="24" y1="48" x2="106" y2="48" stroke="#1a1a2e" stroke-width="1"/>
+            <line x1="24" y1="88" x2="106" y2="88" stroke="#1a1a2e" stroke-width="1"/>
 
             <!-- Centre text -->
-            <text x="65" y="74" text-anchor="middle" font-size="13" font-weight="900" fill="#1a1a2e" letter-spacing="1">ORIGINAL</text>
-            <text x="65" y="88" text-anchor="middle" font-size="11" font-weight="700" fill="#1a1a2e" letter-spacing="1">INVOICE</text>
+            <text x="65" y="68" text-anchor="middle" font-size="13" font-weight="900" fill="#1a1a2e" letter-spacing="1">ORIGINAL</text>
+            <text x="65" y="83" text-anchor="middle" font-size="11" font-weight="700" fill="#1a1a2e" letter-spacing="1">INVOICE</text>
 
-            <!-- Date below bottom divider -->
-            <text x="65" y="106" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1a1a2e" letter-spacing="1.2">@stampDate</text>
+            <!-- Date below bottom divider, inside inner circle -->
+            <text x="65" y="103" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1a1a2e" letter-spacing="1.2">@stampDate</text>
         </svg>
     </div>
 
