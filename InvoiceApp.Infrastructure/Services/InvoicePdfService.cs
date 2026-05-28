@@ -335,7 +335,7 @@ public class InvoicePdfService
                 <line x1="24" y1="88" x2="106" y2="88" stroke="#1a1a2e" stroke-width="1"/>
                 <text x="65" y="68" text-anchor="middle" font-size="13" font-weight="900" fill="#1a1a2e" letter-spacing="1">ORIGINAL</text>
                 <text x="65" y="83" text-anchor="middle" font-size="11" font-weight="700" fill="#1a1a2e" letter-spacing="1">INVOICE</text>
-                <text x="65" y="103" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1a1a2e" letter-spacing="1.2">{dateText}</text>
+                <text x="65" y="100" text-anchor="middle" font-size="8.5" font-weight="700" fill="#1a1a2e" letter-spacing="0.7" textLength="58" lengthAdjust="spacingAndGlyphs">{dateText}</text>
             </svg>
             """;
     }
