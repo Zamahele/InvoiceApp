@@ -113,7 +113,14 @@
             </div>
             <div class="mb-2">
                 <label class="form-label">Phone</label>
-                <input asp-for="Company.Phone" class="form-control" placeholder="e.g. 066 378 7872" />
+                <div class="input-group">
+                    <input asp-for="Company.Phone" class="form-control" placeholder="e.g. 066 378 7872" />
+                    <button type="button" class="btn btn-outline-secondary contact-pick-btn d-none"
+                            data-pick-phone="Company.Phone" data-pick-name="Company.Name"
+                            title="Pick from contacts" aria-label="Pick from contacts">
+                        <i class="bi bi-person-vcard"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
