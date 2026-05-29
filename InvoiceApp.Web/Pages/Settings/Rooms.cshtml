@@ -210,8 +210,14 @@ else
                                        class="form-control form-control-sm" placeholder="Tenant name" />
                             </div>
                             <div class="mb-2">
-                                <input type="text" name="EditTenantPhone" value="@room.TenantPhone"
-                                       class="form-control form-control-sm" placeholder="Phone" />
+                                <div class="input-group input-group-sm">
+                                    <input type="text" name="EditTenantPhone" value="@room.TenantPhone"
+                                           class="form-control" placeholder="Phone" />
+                                    <button type="button" class="btn btn-outline-secondary contact-pick-btn d-none"
+                                            title="Pick from contacts" aria-label="Pick from contacts">
+                                        <i class="bi bi-person-vcard"></i>
+                                    </button>
+                                </div>
                             </div>
                             <div class="mb-2">
                                 <input type="number" name="EditRentAmount" value="@room.RentAmount"
@@ -300,8 +306,14 @@ else
                                                    class="form-control form-control-sm" placeholder="Tenant Name" />
                                         </div>
                                         <div class="col-md-2">
-                                            <input type="text" name="EditTenantPhone" value="@room.TenantPhone"
-                                                   class="form-control form-control-sm" placeholder="Phone" />
+                                            <div class="input-group input-group-sm">
+                                                <input type="text" name="EditTenantPhone" value="@room.TenantPhone"
+                                                       class="form-control" placeholder="Phone" />
+                                                <button type="button" class="btn btn-outline-secondary contact-pick-btn d-none"
+                                                        title="Pick from contacts" aria-label="Pick from contacts">
+                                                    <i class="bi bi-person-vcard"></i>
+                                                </button>
+                                            </div>
                                         </div>
                                         <div class="col-md-1">
                                             <input type="number" name="EditRentAmount" value="@room.RentAmount"
@@ -348,7 +360,13 @@ else
                 </div>
                 <div class="col-12 col-md-2">
                     <label class="form-label">Phone</label>
-                    <input asp-for="NewTenantPhone" class="form-control" placeholder="082 000 0000" />
+                    <div class="input-group">
+                        <input asp-for="NewTenantPhone" class="form-control" placeholder="082 000 0000" />
+                        <button type="button" class="btn btn-outline-secondary contact-pick-btn d-none"
+                                title="Pick from contacts" aria-label="Pick from contacts">
+                            <i class="bi bi-person-vcard"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="col-12 col-md-2">
                     <label class="form-label">Rent (R)</label>
@@ -373,3 +391,41 @@ else
         </form>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        // Device Contact Picker — Chrome/Edge/Samsung on Android over HTTPS only.
+        // On unsupported browsers (iOS Safari, desktop, Firefox) the button stays hidden.
+        (function () {
+            var supported = ('contacts' in navigator) && ('ContactsManager' in window);
+            if (!supported) return;
+
+            document.querySelectorAll('.contact-pick-btn').forEach(function (btn) {
+                btn.classList.remove('d-none');
+                btn.addEventListener('click', async function () {
+                    try {
+                        var contacts = await navigator.contacts.select(['name', 'tel'], { multiple: false });
+                        if (!contacts || contacts.length === 0) return;
+
+                        var picked = contacts[0];
+                        var form = btn.closest('form');
+                        if (!form) return;
+
+                        var nameInput  = form.querySelector('input[name$="TenantName"]');
+                        var phoneInput = form.querySelector('input[name$="TenantPhone"]');
+
+                        if (phoneInput && picked.tel && picked.tel.length > 0) {
+                            phoneInput.value = picked.tel[0];
+                        }
+                        // Only fill name if it's blank, so edits don't clobber existing values.
+                        if (nameInput && !nameInput.value && picked.name && picked.name.length > 0) {
+                            nameInput.value = picked.name[0];
+                        }
+                    } catch (err) {
+                        // user cancelled or denied permission — no-op
+                    }
+                });
+            });
+        })();
+    </script>
+}
