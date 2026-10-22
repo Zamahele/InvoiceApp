@@ -87,6 +87,47 @@ public class RecurringInvoiceServiceTests
         Assert.Equal(new DateTime(2026, 3, 31), schedule.NextRunDate);
     }
 
+    [Fact]
+    public async Task GenerateDueInvoices_NumbersInvoicesWithinCompany()
+    {
+        using var db = CreateDb();
+        db.Invoices.Add(new Invoice
+        {
+            CompanyId = 1,
+            InvoiceNumber = "INV-041",
+            InvoiceDate = new DateTime(2026, 1, 1),
+            ClientName = "Other company"
+        });
+        db.Invoices.Add(new Invoice
+        {
+            CompanyId = 2,
+            InvoiceNumber = "INV-006",
+            InvoiceDate = new DateTime(2026, 1, 1),
+            ClientName = "This company"
+        });
+        var schedule = new RecurringInvoiceSchedule
+        {
+            CompanyId = 2,
+            SourceInvoiceId = 55,
+            ClientName = "This company",
+            DueDay = 10,
+            NextRunDate = new DateTime(2026, 2, 10),
+            LineItems = new List<RecurringInvoiceLineItem>
+            {
+                new() { Description = "Monthly service", Unit = "monthly", Quantity = 1, Rate = 50 }
+            }
+        };
+        db.RecurringInvoiceSchedules.Add(schedule);
+        await db.SaveChangesAsync();
+
+        var service = new RecurringInvoiceService(db);
+        await service.GenerateDueInvoicesAsync(new DateTime(2026, 2, 10));
+
+        var generatedInvoice = await db.Invoices.SingleAsync(invoice => invoice.RecurringScheduleId == schedule.Id);
+        Assert.Equal(2, generatedInvoice.CompanyId);
+        Assert.Equal("INV-007", generatedInvoice.InvoiceNumber);
+    }
+
     [Theory]
     [InlineData(2026, 1, 31, 31, 2026, 2, 28)]
     [InlineData(2026, 2, 28, 31, 2026, 3, 31)]

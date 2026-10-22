@@ -2,6 +2,7 @@ using InvoiceApp.Infrastructure.Data;
 using InvoiceApp.Infrastructure.Identity;
 using InvoiceApp.Infrastructure.Tenancy;
 using InvoiceApp.Web.Tenancy;
+using InvoiceApp.Web.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using QuestPDF.Infrastructure;
@@ -47,6 +48,7 @@ builder.Services.AddScoped<CompanyContext>();
 
 builder.Services.AddScoped<InvoiceApp.Infrastructure.Services.InvoicePdfService>();
 builder.Services.AddScoped<InvoiceApp.Infrastructure.Services.RecurringInvoiceService>();
+builder.Services.AddHostedService<RecurringInvoiceWorker>();
 builder.Services.AddScoped<InvoiceApp.Infrastructure.Services.RentReceiptPdfService>();
 builder.Services.AddScoped<InvoiceApp.Infrastructure.Services.IEmailService, InvoiceApp.Infrastructure.Services.EmailService>();
 

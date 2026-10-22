@@ -83,7 +83,7 @@ public class RecurringInvoiceService
             CompanyId = schedule.CompanyId,
             RecurringScheduleId = schedule.Id,
             RecurringPeriod = new DateTime(invoiceDate.Year, invoiceDate.Month, 1),
-            InvoiceNumber = await GetNextInvoiceNumberAsync(cancellationToken),
+            InvoiceNumber = await GetNextInvoiceNumberAsync(schedule.CompanyId, cancellationToken),
             InvoiceDate = invoiceDate,
             ClientName = schedule.ClientName,
             ClientEmail = schedule.ClientEmail,
@@ -107,9 +107,10 @@ public class RecurringInvoiceService
         };
     }
 
-    private async Task<string> GetNextInvoiceNumberAsync(CancellationToken cancellationToken)
+    private async Task<string> GetNextInvoiceNumberAsync(int companyId, CancellationToken cancellationToken)
     {
         var lastInvoice = await _db.Invoices
+            .Where(invoice => invoice.CompanyId == companyId)
             .OrderByDescending(invoice => invoice.Id)
             .FirstOrDefaultAsync(cancellationToken);
         var nextNumber = 1;
