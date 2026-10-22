@@ -30,12 +30,13 @@ public class InvoiceEmailComposerTests
         Assert.Equal("Invoice-INV-003-BlackTech-Empower.pdf", email.PdfFileName);
         Assert.Contains("Give Compassion NPC", email.HtmlBody);
         Assert.Contains(">BE</td>", email.HtmlBody);
-        Assert.Contains("INV-003", email.HtmlBody);
-        Assert.Contains("R 390.00", email.HtmlBody);
+        Assert.DoesNotContain("INV-003", email.HtmlBody);
+        Assert.Contains("Please find the invoice attached for your review and payment.", email.HtmlBody);
         Assert.Contains("15 Ebor Ave, Durban, 4000", email.HtmlBody);
         Assert.Contains("0735904108", email.HtmlBody);
         Assert.Contains("mail@gcweproperty.co.za", email.HtmlBody);
-        Assert.Contains("Please find invoice INV-003 attached.", email.Body);
+        Assert.Contains("Please find the invoice attached for your review and payment.", email.Body);
+        Assert.Contains("Kind regards,\nBlackTech Empower", email.Body);
     }
 
     [Fact]
@@ -53,7 +54,7 @@ public class InvoiceEmailComposerTests
         var email = InvoiceEmailComposer.Compose(invoice, company, company.Name, "billing@example.com");
 
         Assert.Contains("A&amp;B &lt;Client&gt;", email.HtmlBody);
-        Assert.Contains("INV/004 &lt;draft&gt;", email.HtmlBody);
+        Assert.DoesNotContain("INV/004 &lt;draft&gt;", email.HtmlBody);
         Assert.Equal("Invoice-INV-004-draft-A-B-Services.pdf", email.PdfFileName);
     }
 }

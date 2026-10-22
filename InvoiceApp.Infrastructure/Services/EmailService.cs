@@ -34,10 +34,7 @@ public static class InvoiceEmailComposer
                         : company.Name.Trim();
                 var safeCompany = WebUtility.HtmlEncode(companyName);
                 var safeMark = WebUtility.HtmlEncode(GetCompanyMark(companyName));
-                var safeInvoiceNumber = WebUtility.HtmlEncode(invoice.InvoiceNumber);
                 var safeClientName = WebUtility.HtmlEncode(invoice.ClientName);
-                var invoiceDate = invoice.InvoiceDate.ToString("dd MMM yyyy");
-                var total = invoice.TotalAmount.ToString("N2");
                 var address = string.Join(", ", new[]
                 {
                         company?.AddressLine1,
@@ -66,17 +63,12 @@ public static class InvoiceEmailComposer
                                                 <td align="center" valign="middle" width="42" height="42" style="width:42px;height:42px;background:#c9a84c;border-radius:6px;color:#0f3460;font-size:15px;font-weight:bold;">{safeMark}</td>
                                                 <td style="padding-left:12px;color:#f0c96a;font-size:15px;font-weight:bold;">{safeCompany}</td>
                                             </tr></table>
-                                            <div style="margin-top:15px;color:#ffffff;font-size:23px;font-weight:bold;">Invoice {safeInvoiceNumber}</div>
+                                            <div style="margin-top:15px;color:#ffffff;font-size:23px;font-weight:bold;">Invoice attached</div>
                                         </td></tr>
                                         <tr><td style="padding:28px 30px 18px;">
                                             <div style="font-size:16px;line-height:25px;">Hello {safeClientName},</div>
-                                            <p style="margin:14px 0 20px;color:#526276;font-size:15px;line-height:24px;">Please find your invoice attached. The invoice summary is below for reference.</p>
-                                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border:1px solid #e2e7ed;border-radius:6px;">
-                                                <tr><td style="padding:12px 15px;color:#667085;font-size:13px;border-bottom:1px solid #edf0f4;">Invoice number</td><td align="right" style="padding:12px 15px;color:#0a2444;font-size:14px;font-weight:bold;border-bottom:1px solid #edf0f4;">{safeInvoiceNumber}</td></tr>
-                                                <tr><td style="padding:12px 15px;color:#667085;font-size:13px;border-bottom:1px solid #edf0f4;">Invoice date</td><td align="right" style="padding:12px 15px;color:#243247;font-size:14px;border-bottom:1px solid #edf0f4;">{WebUtility.HtmlEncode(invoiceDate)}</td></tr>
-                                                <tr><td style="padding:14px 15px;color:#243247;font-size:14px;font-weight:bold;">Total due</td><td align="right" style="padding:14px 15px;color:#0f3460;font-size:18px;font-weight:bold;">R {WebUtility.HtmlEncode(total)}</td></tr>
-                                            </table>
-                                            <div style="margin-top:18px;padding:13px 15px;background:#f4f7fa;border-left:4px solid #c9a84c;color:#526276;font-size:13px;line-height:20px;">The PDF invoice is attached to this email for your records.</div>
+                                            <p style="margin:14px 0;color:#526276;font-size:15px;line-height:24px;">Please find the invoice attached for your review and payment.</p>
+                                            <p style="margin:14px 0;color:#526276;font-size:15px;line-height:24px;">If you have any questions or need further information, please contact us using the details below.</p>
                                             <p style="margin:22px 0 0;color:#526276;font-size:14px;line-height:22px;">Kind regards,<br><strong style="color:#0a2444;">{safeCompany}</strong></p>
                                         </td></tr>
                                         <tr><td style="padding:18px 30px 22px;background:#f8fafc;border-top:1px solid #e2e7ed;">
@@ -94,7 +86,7 @@ public static class InvoiceEmailComposer
                 var safeFileCompany = ToFilePart(companyName, "Company");
                 return new InvoiceEmailContent(
                         Subject: $"Invoice {invoice.InvoiceNumber} from {companyName}",
-                        Body: $"Good day {invoice.ClientName},\n\nPlease find invoice {invoice.InvoiceNumber} attached.\nInvoice date: {invoiceDate}\nTotal due: R {total}\n\nKind regards,\n{companyName}\n{address}\n{company?.Phone}\n{fromEmail}",
+                    Body: $"Good day {invoice.ClientName},\n\nPlease find the invoice attached for your review and payment.\n\nIf you have any questions or need further information, please contact us.\n\nKind regards,\n{companyName}\n{address}\n{company?.Phone}\n{fromEmail}",
                         HtmlBody: html,
                         PdfFileName: $"Invoice-{safeFileInvoice}-{safeFileCompany}.pdf");
         }
