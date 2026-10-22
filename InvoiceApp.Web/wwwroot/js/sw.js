@@ -1,4 +1,4 @@
-const CACHE_NAME = 'blacktech-portal-v1';
+const CACHE_NAME = 'blacktech-portal-v2';
 const OFFLINE_URL = '/offline';
 
 // Assets to pre-cache (shell assets only - no financial data)
