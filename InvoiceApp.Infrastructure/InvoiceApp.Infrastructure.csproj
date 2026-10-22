@@ -1,6 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <EmbeddedResource Include="..\InvoiceApp.Web\wwwroot\images\blacktech-empower-logo.svg">
+      <Link>Branding\blacktech-empower-logo.svg</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\InvoiceApp.Core\InvoiceApp.Core.csproj" />
   </ItemGroup>
 

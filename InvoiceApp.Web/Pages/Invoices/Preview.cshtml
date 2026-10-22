@@ -68,6 +68,13 @@
             line-height: 1.2;
         }
 
+        .invoice-company-mark {
+            width: 38px;
+            height: 38px;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
         .invoice-header .invoice-label {
             font-size: 2rem;
             font-weight: 800;
@@ -465,7 +472,7 @@
     <!-- Header -->
     <div class="invoice-header">
         <div>
-            <div class="company-name">@(Model.Company?.Name ?? "Your Company")</div>
+            <div class="company-name"><img src="/images/blacktech-empower-logo.svg" class="invoice-company-mark" alt="" />@(Model.Company?.Name ?? "Your Company")</div>
             @if (!string.IsNullOrEmpty(Model.Company?.Phone))
             {
                 <div style="color:#ccc;font-size:0.82rem;margin-top:4px">

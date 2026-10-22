@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 104 104" role="img" aria-labelledby="logo-title logo-description">
+  <title id="logo-title">BlackTech Empower</title>
+  <desc id="logo-description">Gold BE monogram for BlackTech Empower.</desc>
+  <rect x="3" y="3" width="98" height="98" rx="20" fill="#c9a84c"/>
+  <path d="M24 23h31c15 0 24 8 24 21 0 8-4 14-12 17 10 3 15 10 15 20 0 15-11 23-29 23H24V23zm17 14v17h12c6 0 9-3 9-9s-3-8-9-8H41zm0 31v21h13c7 0 11-4 11-11s-4-10-11-10H41z" transform="translate(0 -7)" fill="#0f3460"/>
+  <path d="M73 38h15v11H73zm0 22h15v11H73zm0 22h15v11H73z" transform="translate(0 -7)" fill="#0f3460"/>
+</svg>

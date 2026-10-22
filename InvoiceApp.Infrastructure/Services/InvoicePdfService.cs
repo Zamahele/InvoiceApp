@@ -29,6 +29,7 @@ public class InvoicePdfService
                 // Stamp - same SVG as HTML preview, bottom right corner
                 var stampSvg = BuildStampSvg(companyName, invoice.InvoiceNumber, invoice.InvoiceDate);
                 var stampImage = SvgImage.FromText(stampSvg);
+                var logoImage = SvgImage.FromText(BlackTechLogo.SvgMarkup);
 
                 page.Foreground()
                     .AlignBottom().AlignRight()
@@ -45,8 +46,12 @@ public class InvoicePdfService
                         // Left: company name + phone
                         row.RelativeItem().Column(left =>
                         {
-                            left.Item().Text(companyName)
-                                .FontSize(16).Bold().FontColor("#ffffff");
+                            left.Item().Row(brand =>
+                            {
+                                brand.ConstantItem(34).Height(34).Svg(logoImage);
+                                brand.RelativeItem().PaddingLeft(9).AlignMiddle()
+                                    .Text(companyName).FontSize(16).Bold().FontColor("#ffffff");
+                            });
 
                             if (!string.IsNullOrEmpty(company?.Phone))
                                 left.Item().PaddingTop(4)

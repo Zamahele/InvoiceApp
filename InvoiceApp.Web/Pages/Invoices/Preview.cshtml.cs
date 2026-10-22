@@ -84,6 +84,11 @@ public class PreviewModel : PageModel
         {
             var pdf = _pdf.Generate(invoice, company, banking);
             var companyName = company?.Name ?? settings.FromName;
+            var emailContent = InvoiceEmailComposer.Compose(
+                invoice,
+                company,
+                string.IsNullOrWhiteSpace(settings.FromName) ? companyName : settings.FromName,
+                settings.FromEmail);
 
             await _email.SendInvoiceAsync(new EmailSendRequest(
                 SmtpHost: settings.SmtpHost,
@@ -94,10 +99,11 @@ public class PreviewModel : PageModel
                 FromName: string.IsNullOrWhiteSpace(settings.FromName) ? companyName : settings.FromName,
                 FromEmail: settings.FromEmail,
                 ToEmail: invoice.ClientEmail!,
-                Subject: $"Invoice {invoice.InvoiceNumber} from {companyName}",
-                Body: $"Good day,\n\nPlease find attached invoice {invoice.InvoiceNumber}.\n\nKind regards,\n{companyName}",
+                Subject: emailContent.Subject,
+                Body: emailContent.Body,
+                HtmlBody: emailContent.HtmlBody,
                 PdfBytes: pdf,
-                PdfFileName: $"{invoice.InvoiceNumber}.pdf"));
+                PdfFileName: emailContent.PdfFileName));
 
             StatusMessage = $"Invoice emailed to {invoice.ClientEmail}.";
             StatusIsError = false;

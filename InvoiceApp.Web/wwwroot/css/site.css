@@ -33,6 +33,7 @@ body {
 
 .navbar.navbar-dark { background: var(--navy) !important; box-shadow: 0 2px 12px rgba(10, 36, 68, 0.14); }
 .navbar-brand { color: var(--gold) !important; font-size: 1.05rem; white-space: nowrap; }
+.brand-logo-mark { height: 30px; margin-right: .45rem; vertical-align: middle; width: 30px; }
 .navbar-brand:hover { color: var(--gold-light) !important; }
 .navbar-dark .navbar-brand { color: var(--gold) !important; }
 .navbar-dark .nav-link { border-radius: 6px; color: rgba(255,255,255,.8); transition: background-color .16s, color .16s; }
