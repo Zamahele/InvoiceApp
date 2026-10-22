@@ -88,6 +88,21 @@ a { color: var(--navy); }
 .offline-retry:disabled { cursor: wait; opacity: .8; }
 @keyframes offline-pulse { 0% { opacity: .75; transform: scale(.72); } 75%, 100% { opacity: 0; transform: scale(1.55); } }
 @media (prefers-reduced-motion: reduce) { .offline-signal-ring { animation: none; opacity: .35; } }
+.invoice-mobile-submit { align-items: center; background: #fff; border-top: 1px solid var(--line); bottom: 62px; box-shadow: 0 -5px 18px rgba(15, 52, 96, .08); display: flex; gap: .8rem; justify-content: space-between; left: 0; padding: .65rem 1rem calc(.65rem + env(safe-area-inset-bottom)); position: fixed; right: 0; z-index: 1025; }
+.invoice-mobile-total { display: flex; flex-direction: column; font-size: .72rem; line-height: 1.25; }
+.invoice-mobile-total span { color: var(--muted); }
+.invoice-mobile-total strong { color: var(--navy-dark); font-size: .95rem; }
+.invoice-mobile-submit .btn { flex: 1; max-width: 230px; }
+.property-mobile-card { box-shadow: none; }
+.line-item { background: #fff; border-color: #dce3eb !important; }
+.line-item-heading { align-items: center; display: flex; justify-content: space-between; margin-bottom: .4rem; }
+.li-index { color: #65758a; font-size: .68rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.line-item-total { align-items: baseline; display: flex; gap: .45rem; min-width: 0; }
+.line-item-total span { color: var(--muted); font-size: .72rem; white-space: nowrap; }
+.line-item-total strong { color: var(--navy); font-size: .92rem; white-space: nowrap; }
+.line-item .form-label { font-size: .72rem; white-space: nowrap; }
+.line-item .form-control, .line-item .form-select { min-width: 0; padding-left: .55rem; padding-right: .4rem; }
+.line-item .li-amount { white-space: nowrap; }
 
 @media (max-width: 767.98px) {
   body { padding-bottom: 70px; }
@@ -99,4 +114,8 @@ a { color: var(--navy); }
   .card-body { padding: .9rem; }
   .navbar-toggler { min-height: 44px; min-width: 44px; }
   .table-responsive { -webkit-overflow-scrolling: touch; }
+  #invoiceForm { padding-bottom: 78px; }
+  #lineItems > .line-item { padding: .65rem !important; }
+  .line-item .row { --bs-gutter-x: .45rem; }
+  .line-item .form-control, .line-item .form-select { font-size: .92rem; }
 }
