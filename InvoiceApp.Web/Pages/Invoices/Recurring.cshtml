@@ -1,0 +1,104 @@
+@page
+@model InvoiceApp.Web.Pages.Invoices.RecurringModel
+@{
+    ViewData["Title"] = "Recurring Invoices";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h5 class="fw-bold mb-1">Recurring Invoices</h5>
+        <p class="text-muted small mb-0">Create the same invoice monthly on the day you choose.</p>
+    </div>
+    <a href="/Invoices/History" class="btn btn-sm btn-outline-secondary" aria-label="Back to invoice history">
+        <i class="bi bi-arrow-left"></i><span class="d-none d-sm-inline ms-1">History</span>
+    </a>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+{
+    <div class="alert alert-success py-2">@Model.StatusMessage</div>
+}
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger py-2">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(value => value.Errors))
+        {
+            <div>@error.ErrorMessage</div>
+        }
+    </div>
+}
+
+@if (Model.SourceInvoice != null)
+{
+    @if (Model.ExistingSchedule != null)
+    {
+        <div class="alert alert-info">
+            <strong>@Model.SourceInvoice.InvoiceNumber</strong> already has a monthly schedule for @Model.SourceInvoice.ClientName.
+            Its next invoice is due @Model.ExistingSchedule.NextRunDate.ToString("dd MMM yyyy").
+        </div>
+    }
+    else
+    {
+        <form method="post" asp-page-handler="Create" asp-route-sourceId="@Model.SourceInvoice.Id" class="card mb-4">
+            <div class="card-header fw-semibold"><i class="bi bi-arrow-repeat"></i> Schedule @Model.SourceInvoice.InvoiceNumber monthly</div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                    <div>
+                        <div class="fw-semibold">@Model.SourceInvoice.ClientName</div>
+                        <div class="text-muted small">@Model.SourceInvoice.LineItems.Count line item(s) copied from this invoice</div>
+                    </div>
+                    <div class="fw-bold text-primary">R @Model.SourceInvoice.TotalAmount.ToString("N2")</div>
+                </div>
+                <label asp-for="DueDay" class="form-label">Create invoice on day</label>
+                <select asp-for="DueDay" class="form-select mb-2">
+                    @for (var day = 1; day <= 31; day++)
+                    {
+                        <option value="@day">Day @day of each month</option>
+                    }
+                </select>
+                <div class="form-text mb-3">The first recurring invoice will be created next month. For months shorter than the selected day, it will be created on that month’s last day.</div>
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-calendar-check"></i> Start monthly schedule
+                </button>
+            </div>
+        </form>
+    }
+}
+
+@if (Model.Schedules.Count == 0)
+{
+    <div class="text-center text-muted py-5">
+        <i class="bi bi-calendar2-minus fs-1"></i>
+        <p class="mt-2 mb-1">No recurring invoices yet.</p>
+        <p class="small mb-0">Open an invoice preview and choose “Schedule monthly”.</p>
+    </div>
+}
+else
+{
+    <h6 class="text-muted fw-semibold mb-3">Schedules</h6>
+    @foreach (var schedule in Model.Schedules)
+    {
+        <article class="card mb-3">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start gap-3">
+                    <div class="min-w-0">
+                        <div class="fw-semibold">@schedule.ClientName</div>
+                        <div class="text-muted small">@(schedule.ClientEmail ?? "No client email")</div>
+                        <div class="small mt-2">@schedule.LineItems.Count item(s) · Day @schedule.DueDay each month</div>
+                        <div class="text-muted small">Next invoice: @schedule.NextRunDate.ToString("dd MMM yyyy")</div>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge @(schedule.IsActive ? "bg-success" : "bg-secondary")">@(schedule.IsActive ? "Active" : "Paused")</span>
+                        <form method="post" asp-page-handler="Toggle" asp-route-id="@schedule.Id" class="mt-2">
+                            <button type="submit" class="btn btn-sm @(schedule.IsActive ? "btn-outline-secondary" : "btn-outline-success")">
+                                <i class="bi @(schedule.IsActive ? "bi-pause" : "bi-play")"></i>
+                                @(schedule.IsActive ? "Pause" : "Resume")
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </article>
+    }
+}

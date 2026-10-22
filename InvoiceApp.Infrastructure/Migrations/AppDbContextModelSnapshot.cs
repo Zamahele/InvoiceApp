@@ -245,6 +245,12 @@ namespace InvoiceApp.Infrastructure.Migrations
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("RecurringPeriod")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("RecurringScheduleId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("ReissueDate")
                         .HasColumnType("datetime2");
 
@@ -279,6 +285,10 @@ namespace InvoiceApp.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CompanyId");
+
+                    b.HasIndex("RecurringScheduleId", "RecurringPeriod")
+                        .IsUnique()
+                        .HasFilter("[RecurringScheduleId] IS NOT NULL");
 
                     b.ToTable("Invoices", "blacktech");
                 });
@@ -360,6 +370,119 @@ namespace InvoiceApp.Infrastructure.Migrations
                     b.HasIndex("CompanyId");
 
                     b.ToTable("Properties", "blacktech");
+                });
+
+            modelBuilder.Entity("InvoiceApp.Core.Entities.RecurringInvoiceLineItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Quantity")
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<decimal>("Rate")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("RecurringInvoiceScheduleId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RecurringInvoiceScheduleId");
+
+                    b.ToTable("RecurringInvoiceLineItems", "blacktech");
+                });
+
+            modelBuilder.Entity("InvoiceApp.Core.Entities.RecurringInvoiceSchedule", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClientAddressLine1")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClientAddressLine2")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClientCity")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClientEmail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClientName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClientPostalCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DueDay")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("NextRunDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("RetentionEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal>("RetentionPercentage")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<string>("RetentionType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SourceInvoiceId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("VATEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal>("VATRate")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompanyId");
+
+                    b.HasIndex("SourceInvoiceId")
+                        .IsUnique();
+
+                    b.ToTable("RecurringInvoiceSchedules", "blacktech");
                 });
 
             modelBuilder.Entity("InvoiceApp.Core.Entities.RentPayment", b =>
@@ -723,7 +846,14 @@ namespace InvoiceApp.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("InvoiceApp.Core.Entities.RecurringInvoiceSchedule", "RecurringSchedule")
+                        .WithMany()
+                        .HasForeignKey("RecurringScheduleId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Company");
+
+                    b.Navigation("RecurringSchedule");
                 });
 
             modelBuilder.Entity("InvoiceApp.Core.Entities.LineItem", b =>
@@ -738,6 +868,28 @@ namespace InvoiceApp.Infrastructure.Migrations
                 });
 
             modelBuilder.Entity("InvoiceApp.Core.Entities.Property", b =>
+                {
+                    b.HasOne("InvoiceApp.Core.Entities.Company", "Company")
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Company");
+                });
+
+            modelBuilder.Entity("InvoiceApp.Core.Entities.RecurringInvoiceLineItem", b =>
+                {
+                    b.HasOne("InvoiceApp.Core.Entities.RecurringInvoiceSchedule", "Schedule")
+                        .WithMany("LineItems")
+                        .HasForeignKey("RecurringInvoiceScheduleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Schedule");
+                });
+
+            modelBuilder.Entity("InvoiceApp.Core.Entities.RecurringInvoiceSchedule", b =>
                 {
                     b.HasOne("InvoiceApp.Core.Entities.Company", "Company")
                         .WithMany()
@@ -866,6 +1018,11 @@ namespace InvoiceApp.Infrastructure.Migrations
             modelBuilder.Entity("InvoiceApp.Core.Entities.Property", b =>
                 {
                     b.Navigation("Rooms");
+                });
+
+            modelBuilder.Entity("InvoiceApp.Core.Entities.RecurringInvoiceSchedule", b =>
+                {
+                    b.Navigation("LineItems");
                 });
 
             modelBuilder.Entity("InvoiceApp.Core.Entities.Room", b =>

@@ -27,6 +27,8 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<Company> Companies => Set<Company>();
     public DbSet<Invoice> Invoices => Set<Invoice>();
+    public DbSet<RecurringInvoiceSchedule> RecurringInvoiceSchedules => Set<RecurringInvoiceSchedule>();
+    public DbSet<RecurringInvoiceLineItem> RecurringInvoiceLineItems => Set<RecurringInvoiceLineItem>();
     public DbSet<LineItem> LineItems => Set<LineItem>();
     public DbSet<CompanySettings> CompanySettings => Set<CompanySettings>();
     public DbSet<BankingDetails> BankingDetails => Set<BankingDetails>();
@@ -89,6 +91,36 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             .HasForeignKey(l => l.InvoiceId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        modelBuilder.Entity<RecurringInvoiceSchedule>()
+            .HasMany(s => s.LineItems)
+            .WithOne(l => l.Schedule)
+            .HasForeignKey(l => l.RecurringInvoiceScheduleId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<RecurringInvoiceSchedule>()
+            .HasIndex(s => s.SourceInvoiceId)
+            .IsUnique();
+
+        modelBuilder.Entity<Invoice>()
+            .HasOne(i => i.RecurringSchedule)
+            .WithMany()
+            .HasForeignKey(i => i.RecurringScheduleId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Invoice>()
+            .HasIndex(i => new { i.RecurringScheduleId, i.RecurringPeriod })
+            .IsUnique()
+            .HasFilter("[RecurringScheduleId] IS NOT NULL");
+
+        modelBuilder.Entity<RecurringInvoiceSchedule>()
+            .Property(s => s.VATRate).HasColumnType("decimal(5,2)");
+        modelBuilder.Entity<RecurringInvoiceSchedule>()
+            .Property(s => s.RetentionPercentage).HasColumnType("decimal(5,2)");
+        modelBuilder.Entity<RecurringInvoiceLineItem>()
+            .Property(l => l.Quantity).HasColumnType("decimal(18,4)");
+        modelBuilder.Entity<RecurringInvoiceLineItem>()
+            .Property(l => l.Rate).HasColumnType("decimal(18,2)");
+
         modelBuilder.Entity<Invoice>()
             .Property(i => i.SubTotal).HasColumnType("decimal(18,2)");
         modelBuilder.Entity<Invoice>()
@@ -113,6 +145,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
         // Tenant isolation: every owned entity is filtered to the current company.
         // When _companyId is null (migrations/tests) the filter passes everything.
         modelBuilder.Entity<Invoice>().HasQueryFilter(e => !_companyId.HasValue || e.CompanyId == _companyId);
+        modelBuilder.Entity<RecurringInvoiceSchedule>().HasQueryFilter(e => !_companyId.HasValue || e.CompanyId == _companyId);
         modelBuilder.Entity<CompanySettings>().HasQueryFilter(e => !_companyId.HasValue || e.CompanyId == _companyId);
         modelBuilder.Entity<BankingDetails>().HasQueryFilter(e => !_companyId.HasValue || e.CompanyId == _companyId);
         modelBuilder.Entity<SavedRate>().HasQueryFilter(e => !_companyId.HasValue || e.CompanyId == _companyId);
@@ -123,6 +156,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
         // LineItem isn't tenant-owned directly; match its parent Invoice's filter so the
         // required Invoice->LineItem relationship stays consistent under filtering.
         modelBuilder.Entity<LineItem>().HasQueryFilter(l => !_companyId.HasValue || l.Invoice.CompanyId == _companyId);
+        modelBuilder.Entity<RecurringInvoiceLineItem>().HasQueryFilter(l => !_companyId.HasValue || l.Schedule.CompanyId == _companyId);
     }
 
     public override int SaveChanges()

@@ -6,10 +6,20 @@
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h5 class="fw-bold mb-0">Invoice History</h5>
-    <a href="/Invoices/Create" class="btn btn-sm btn-primary">
-        <i class="bi bi-plus-circle"></i> New
-    </a>
+    <div class="d-flex gap-2">
+        <a href="/Invoices/Recurring" class="btn btn-sm btn-outline-primary">
+            <i class="bi bi-arrow-repeat"></i> Recurring
+        </a>
+        <a href="/Invoices/Create" class="btn btn-sm btn-primary">
+            <i class="bi bi-plus-circle"></i> New
+        </a>
+    </div>
 </div>
+
+@if (Model.RecurringInvoicesGenerated > 0)
+{
+    <div class="alert alert-success py-2">@Model.RecurringInvoicesGenerated recurring invoice(s) were created for their scheduled month.</div>
+}
 
 @* Search and Filter Form *@
 <form method="get" class="card mb-4">

@@ -7,6 +7,10 @@ public class Invoice : ITenantOwned
     public int CompanyId { get; set; }
     public Company? Company { get; set; }
 
+    public int? RecurringScheduleId { get; set; }
+    public RecurringInvoiceSchedule? RecurringSchedule { get; set; }
+    public DateTime? RecurringPeriod { get; set; }
+
     public string InvoiceNumber { get; set; } = string.Empty;
     public DateTime InvoiceDate { get; set; }
     public bool IsReissue { get; set; }

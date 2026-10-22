@@ -445,6 +445,12 @@
     <a href="/Invoices/Create?id=@Model.Invoice!.Id" class="btn btn-sm btn-outline-light">
         <i class="bi bi-pencil"></i> Edit
     </a>
+    @if (Model.Invoice.RecurringScheduleId == null)
+    {
+        <a href="/Invoices/Recurring?sourceId=@Model.Invoice.Id" class="btn btn-sm btn-outline-light">
+            <i class="bi bi-arrow-repeat"></i> Schedule monthly
+        </a>
+    }
     <button onclick="window.print()" class="btn btn-sm btn-outline-light">
         <i class="bi bi-printer"></i> Print
     </button>

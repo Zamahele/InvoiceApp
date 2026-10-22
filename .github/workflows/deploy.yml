@@ -88,6 +88,26 @@ jobs:
 
           echo "Deployment files prepared"
 
+      - name: Stop IIS app for file replacement
+        run: |
+          FTP_HOST="$(printf '%s' "${{ secrets.FTP_SERVER }}" | tr -d '[:space:]' | sed -E 's#^ftps?://##')"
+
+          cat << 'EOF' > app_offline.htm
+          <!doctype html>
+          <html lang="en">
+          <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Updating</title></head>
+          <body style="font-family:Segoe UI,Arial,sans-serif;padding:40px;max-width:700px;margin:auto;color:#243247;">
+            <h1>We will be back shortly</h1>
+            <p>A brief update is in progress. Please try again in a moment.</p>
+          </body>
+          </html>
+          EOF
+
+          curl --fail --ftp-create-dirs \
+            -T ./app_offline.htm \
+            --user "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
+            "ftp://${FTP_HOST}/blacktech.gcweproperty.co.za/wwwroot/app_offline.htm"
+
       - name: Deploy to FTP server
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -101,6 +121,15 @@ jobs:
             **/.git*
             **/.git*/**
             **/node_modules/**
+
+      - name: Restart IIS app after file replacement
+        if: always()
+        continue-on-error: true
+        run: |
+          FTP_HOST="$(printf '%s' "${{ secrets.FTP_SERVER }}" | tr -d '[:space:]' | sed -E 's#^ftps?://##')"
+          curl --fail --user "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
+            --quote "DELE /blacktech.gcweproperty.co.za/wwwroot/app_offline.htm" \
+            "ftp://${FTP_HOST}/"
 
       - name: Verify application startup
         run: |

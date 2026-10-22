@@ -46,6 +46,7 @@ builder.Services.AddScoped<ICurrentCompanyProvider, CurrentCompanyProvider>();
 builder.Services.AddScoped<CompanyContext>();
 
 builder.Services.AddScoped<InvoiceApp.Infrastructure.Services.InvoicePdfService>();
+builder.Services.AddScoped<InvoiceApp.Infrastructure.Services.RecurringInvoiceService>();
 builder.Services.AddScoped<InvoiceApp.Infrastructure.Services.RentReceiptPdfService>();
 builder.Services.AddScoped<InvoiceApp.Infrastructure.Services.IEmailService, InvoiceApp.Infrastructure.Services.EmailService>();
 
