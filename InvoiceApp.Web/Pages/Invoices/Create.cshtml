@@ -1,15 +1,17 @@
 @page
 @model InvoiceApp.Web.Pages.Invoices.CreateModel
 @{
-    ViewData["Title"] = "New Invoice";
+    ViewData["Title"] = Model.IsEditing ? "Edit Invoice" : "New Invoice";
 
     // Unit options come from the rate library (Model.Units, sourced from SavedRates in the DB).
     var units = Model.Units;
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h5 class="fw-bold mb-0">New Invoice</h5>
-    <a href="/" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i></a>
+    <h5 class="fw-bold mb-0">@(Model.IsEditing ? "Edit Invoice" : "New Invoice")</h5>
+    <a href="@(Model.IsEditing ? $"/Invoices/Preview?id={Model.Invoice.Id}" : "/")" class="btn btn-sm btn-outline-secondary" aria-label="Back">
+        <i class="bi bi-arrow-left"></i>
+    </a>
 </div>
 
 @if (Model.Company == null || string.IsNullOrEmpty(Model.Company.Name))
@@ -33,6 +35,7 @@
 }
 
 <form method="post" id="invoiceForm" class="needs-validation" novalidate>
+    <input asp-for="Invoice.Id" type="hidden" />
 
     <!-- Invoice Meta -->
     <div class="card mb-3">
@@ -42,7 +45,7 @@
                 <div class="col-6">
                     <label class="form-label">Invoice No</label>
                     <input asp-for="Invoice.InvoiceNumber" class="form-control"
-                           value="@Model.NextInvoiceNumber" required />
+                           value="@(Model.IsEditing ? Model.Invoice.InvoiceNumber : Model.NextInvoiceNumber)" required />
                     <div class="invalid-feedback">Invoice number is required.</div>
                 </div>
                 <div class="col-6">
@@ -156,13 +159,13 @@
                                 <label class="form-label small mb-1">Qty</label>
                                 <input name="Items[@i].Quantity" type="number" step="0.001"
                                        class="form-control li-qty" placeholder="Qty"
-                                       value="@(Model.Items[i].Quantity == 0 ? "" : Model.Items[i].Quantity.ToString(System.Globalization.CultureInfo.InvariantCulture))" />
+                                       value="@(Model.Items[i].Quantity.GetValueOrDefault() == 0 ? "" : Model.Items[i].Quantity?.ToString(System.Globalization.CultureInfo.InvariantCulture))" />
                             </div>
                             <div class="col-6 col-sm-4">
                                 <label class="form-label small mb-1">Rate (R)</label>
                                 <input name="Items[@i].Rate" type="number" step="0.01"
                                        class="form-control li-rate" placeholder="Rate"
-                                       value="@(Model.Items[i].Rate == 0 ? "" : Model.Items[i].Rate.ToString(System.Globalization.CultureInfo.InvariantCulture))" />
+                                       value="@(Model.Items[i].Rate.GetValueOrDefault() == 0 ? "" : Model.Items[i].Rate?.ToString(System.Globalization.CultureInfo.InvariantCulture))" />
                             </div>
                         </div>
                         <div class="d-flex justify-content-between align-items-center">
@@ -196,7 +199,7 @@
     </div>
 
     <button type="submit" class="btn btn-primary w-100 mb-4">
-        <i class="bi bi-eye"></i> Preview Invoice
+        <i class="bi bi-@(Model.IsEditing ? "check-lg" : "eye")"></i> @(Model.IsEditing ? "Save Changes" : "Preview Invoice")
     </button>
 
 </form>

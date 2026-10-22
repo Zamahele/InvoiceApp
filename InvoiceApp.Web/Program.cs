@@ -10,8 +10,16 @@ var builder = WebApplication.CreateBuilder(args);
 
 QuestPDF.Settings.License = LicenseType.Community;
 
+var invoiceConnectionString = Environment.GetEnvironmentVariable("invoiceapp_ConnectionString")
+    ?? builder.Configuration.GetConnectionString("DefaultConnection");
+if (string.IsNullOrWhiteSpace(invoiceConnectionString))
+{
+    throw new InvalidOperationException(
+        "No database connection string is configured. Set the invoiceapp_ConnectionString environment variable or configure ConnectionStrings:DefaultConnection for the active environment.");
+}
+
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(invoiceConnectionString));
 
 builder.Services
     .AddIdentity<ApplicationUser, IdentityRole>(options =>

@@ -355,6 +355,12 @@
 
         /* Mobile */
         @@media screen and (max-width: 600px) {
+            .invoice-toolbar { flex-wrap: wrap; justify-content: stretch !important; }
+            .invoice-toolbar > a,
+            .invoice-toolbar > button,
+            .invoice-toolbar > form { flex: 1 1 calc(50% - 8px); }
+            .invoice-toolbar .btn { min-height: 44px; width: 100%; }
+            .invoice-toolbar form { display: flex; margin: 0; }
             .invoice-wrap { margin: 0; border-radius: 0; }
             .invoice-header { padding: 16px 16px 14px; flex-direction: column; gap: 8px; }
             .invoice-header .invoice-label { text-align: left; font-size: 1.5rem; }
@@ -425,9 +431,12 @@
 <body>
 
 <!-- Toolbar -->
-<div class="no-print bg-dark p-2 d-flex gap-2 justify-content-center sticky-top">
+<div class="no-print invoice-toolbar bg-dark p-2 d-flex gap-2 justify-content-center sticky-top">
     <a href="/Invoices/History" class="btn btn-sm btn-outline-light">
         <i class="bi bi-arrow-left"></i> Back
+    </a>
+    <a href="/Invoices/Create?id=@Model.Invoice!.Id" class="btn btn-sm btn-outline-light">
+        <i class="bi bi-pencil"></i> Edit
     </a>
     <button onclick="window.print()" class="btn btn-sm btn-outline-light">
         <i class="bi bi-printer"></i> Print
