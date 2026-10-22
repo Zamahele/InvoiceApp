@@ -128,15 +128,24 @@ main .text-primary { color: #174d80 !important; }
 .invoice-mobile-total strong { color: var(--navy-dark); font-size: .95rem; }
 .invoice-mobile-submit .btn { flex: 1; max-width: 230px; }
 .property-mobile-card { box-shadow: none; }
-.line-item { background: #fff; border-color: #dce3eb !important; }
-.line-item-heading { align-items: center; display: flex; justify-content: space-between; margin-bottom: .4rem; }
-.li-index { color: #65758a; font-size: .68rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
-.line-item-total { align-items: baseline; display: flex; gap: .45rem; min-width: 0; }
-.line-item-total span { color: var(--muted); font-size: .72rem; white-space: nowrap; }
-.line-item-total strong { color: var(--navy); font-size: .92rem; white-space: nowrap; }
-.line-item .form-label { font-size: .72rem; white-space: nowrap; }
-.line-item .form-control, .line-item .form-select { min-width: 0; padding-left: .55rem; padding-right: .4rem; }
-.line-item .li-amount { white-space: nowrap; }
+.invoice-item-row { align-items: center; background: #fff; border: 1px solid #e0e6ed; border-radius: 7px; display: flex; gap: .55rem; margin-bottom: .5rem; padding: .65rem .7rem; }
+.invoice-item-row:hover { border-color: #c4d0dd; }
+.invoice-item-main { align-items: center; display: flex; flex: 1; gap: .7rem; min-width: 0; }
+.invoice-item-number { align-items: center; background: #edf2f7; border-radius: 6px; color: #526276; display: inline-flex; flex: 0 0 28px; font-size: .72rem; font-weight: 700; height: 28px; justify-content: center; }
+.invoice-item-description { display: flex; flex: 1; flex-direction: column; gap: .14rem; min-width: 0; }
+.item-description { color: var(--navy-dark); font-size: .9rem; overflow-wrap: anywhere; }
+.item-meta { color: var(--muted); font-size: .74rem; }
+.item-amount { color: var(--navy); font-size: .9rem; white-space: nowrap; }
+.invoice-item-actions { display: flex; gap: .35rem; }
+.invoice-item-actions .btn { align-items: center; display: inline-flex; height: 40px; justify-content: center; min-width: 40px; padding: .35rem; }
+.invoice-item-editor { background: #f7f9fb; border: 1px solid #d9e2eb; border-radius: 8px; margin-top: .65rem; padding: .85rem; }
+.line-item-heading { align-items: center; color: var(--navy-dark); display: flex; justify-content: space-between; margin-bottom: .65rem; }
+.line-item-heading strong { font-size: .9rem; }
+.line-item-heading .btn { height: 40px; min-width: 40px; padding: .35rem; }
+.invoice-item-editor .form-label { font-size: .72rem; white-space: nowrap; }
+.invoice-item-editor .form-control, .invoice-item-editor .form-select { min-width: 0; padding-left: .55rem; padding-right: .4rem; }
+.item-add-trigger { align-items: center; border-radius: 50%; display: inline-flex; height: 48px; justify-content: center; margin-top: .6rem; min-height: 48px; min-width: 48px; padding: 0; width: 48px; }
+.item-add-trigger i { font-size: 1.2rem; }
 
 @media (max-width: 767.98px) {
   body { padding-bottom: 70px; }
@@ -155,9 +164,17 @@ main .text-primary { color: #174d80 !important; }
   .app-main { padding-top: 1rem !important; }
   .pagination .page-link { padding: .5rem .65rem; }
   #invoiceForm { padding-bottom: 78px; }
-  #lineItems > .line-item { padding: .65rem !important; }
-  .line-item .row { --bs-gutter-x: .45rem; }
-  .line-item .form-control, .line-item .form-select { font-size: .92rem; }
+  .invoice-item-row { align-items: flex-start; gap: .35rem; padding: .6rem .5rem; }
+  .invoice-item-main { align-items: flex-start; gap: .45rem; }
+  .invoice-item-number { flex-basis: 24px; height: 24px; }
+  .item-description { font-size: .84rem; }
+  .item-meta { font-size: .68rem; }
+  .item-amount { font-size: .78rem; padding-top: .2rem; }
+  .invoice-item-actions { flex-direction: column; gap: .25rem; }
+  .invoice-item-actions .btn { height: 36px; min-height: 36px; min-width: 36px; width: 36px; }
+  .invoice-item-editor { padding: .7rem; }
+  .invoice-item-editor .row { --bs-gutter-x: .45rem; }
+  .invoice-item-editor .form-control, .invoice-item-editor .form-select { font-size: .9rem; }
   .row.g-3 > .col-6 > a > .card .card-body { gap: .6rem; padding: .8rem; }
   .row.g-3 > .col-6 > a > .card .card-body > i { flex-basis: 40px; font-size: 1.15rem; height: 40px; }
   .row.g-3 > .col-6 > a > .card .card-body p { font-size: .88rem; }

@@ -5,6 +5,9 @@
 
     // Unit options come from the rate library (Model.Units, sourced from SavedRates in the DB).
     var units = Model.Units;
+    var hasLineItems = Model.Items.Any(item => !string.IsNullOrWhiteSpace(item.Description)
+        || item.Quantity.GetValueOrDefault() != 0
+        || item.Rate.GetValueOrDefault() != 0);
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -118,7 +121,7 @@
                 <div class="mb-2">
                     <label class="form-label small mb-1">Add a saved item</label>
                     <select id="savedRatePicker" class="form-select">
-                        <option value="">+ Add saved rate…</option>
+                        <option value="">Choose a saved item…</option>
                         @foreach (var r in Model.SavedRates)
                         {
                             <option value="@r.Description" data-unit="@r.Unit" data-rate="@(r.Rate.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))">
@@ -133,59 +136,79 @@
             <div id="lineItems">
                 @for (int i = 0; i < Model.Items.Count; i++)
                 {
-                    <div class="line-item border rounded p-2 mb-2">
-                        <div class="line-item-heading">
-                            <span class="li-index">Line @(i + 1)</span>
-                        </div>
-                        <div class="mb-2">
-                            <input name="Items[@i].Description" class="form-control li-desc"
-                                   value="@Model.Items[i].Description" placeholder="Description" />
-                        </div>
-                        <div class="row g-2 mb-2">
-                            <div class="col-4">
-                                <label class="form-label small mb-1">Unit</label>
-                                <select name="Items[@i].Unit" class="form-select li-unit">
-                                    @foreach (var u in units)
-                                    {
-                                        if (Model.Items[i].Unit == u)
-                                        {
-                                            <option value="@u" selected>@u</option>
-                                        }
-                                        else
-                                        {
-                                            <option value="@u">@u</option>
-                                        }
-                                    }
-                                </select>
+                    @if (!string.IsNullOrWhiteSpace(Model.Items[i].Description)
+                        || Model.Items[i].Quantity.GetValueOrDefault() != 0
+                        || Model.Items[i].Rate.GetValueOrDefault() != 0)
+                    {
+                        var quantityValue = Model.Items[i].Quantity?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? string.Empty;
+                        var rateValue = Model.Items[i].Rate?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? string.Empty;
+                        <article class="invoice-item-row">
+                            <input type="hidden" name="Items[@i].Description" data-field="Description" value="@Model.Items[i].Description" />
+                            <input type="hidden" name="Items[@i].Unit" data-field="Unit" value="@Model.Items[i].Unit" />
+                            <input type="hidden" name="Items[@i].Quantity" data-field="Quantity" value="@quantityValue" />
+                            <input type="hidden" name="Items[@i].Rate" data-field="Rate" value="@rateValue" />
+                            <div class="invoice-item-main">
+                                <span class="invoice-item-number">@(i + 1)</span>
+                                <div class="invoice-item-description">
+                                    <strong class="item-description">@Model.Items[i].Description</strong>
+                                    <span class="item-meta">@quantityValue @Model.Items[i].Unit × R @Model.Items[i].Rate?.ToString("N2")</span>
+                                </div>
+                                <strong class="item-amount">R @((Model.Items[i].Quantity.GetValueOrDefault() * Model.Items[i].Rate.GetValueOrDefault()).ToString("N2"))</strong>
                             </div>
-                            <div class="col-4">
-                                <label class="form-label small mb-1">Qty</label>
-                                <input name="Items[@i].Quantity" type="number" step="0.001"
-                                       class="form-control li-qty" placeholder="Qty"
-                                       value="@(Model.Items[i].Quantity.GetValueOrDefault() == 0 ? "" : Model.Items[i].Quantity?.ToString(System.Globalization.CultureInfo.InvariantCulture))" />
+                            <div class="invoice-item-actions">
+                                <button type="button" class="btn btn-outline-primary item-edit" title="Edit line" aria-label="Edit line">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-danger item-remove" title="Remove line" aria-label="Remove line">
+                                    <i class="bi bi-trash"></i>
+                                </button>
                             </div>
-                            <div class="col-4">
-                                <label class="form-label small mb-1">Rate (R)</label>
-                                <input name="Items[@i].Rate" type="number" step="0.01"
-                                       class="form-control li-rate" placeholder="Rate"
-                                       value="@(Model.Items[i].Rate.GetValueOrDefault() == 0 ? "" : Model.Items[i].Rate?.ToString(System.Globalization.CultureInfo.InvariantCulture))" />
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div class="line-item-total">
-                                <span>Line total</span>
-                                <strong class="li-amount">R 0.00</strong>
-                            </div>
-                            <button type="button" class="btn btn-sm btn-outline-danger li-remove" style="min-width: 44px; min-height: 44px;">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
-                    </div>
+                        </article>
+                    }
                 }
             </div>
 
-            <button type="button" class="btn btn-outline-primary w-100 mt-2" id="addBlankRow" style="min-height: 44px;">
-                <i class="bi bi-plus-circle"></i> Add blank line (manual)
+            <div id="itemEditor" class="invoice-item-editor @(hasLineItems ? "d-none" : "")">
+                <div class="line-item-heading">
+                    <strong id="itemEditorTitle">New line item</strong>
+                    <button type="button" class="btn btn-outline-secondary" id="closeItemEditor" title="Close editor" aria-label="Close editor">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small mb-1" for="editorDescription">Description</label>
+                    <input id="editorDescription" class="form-control" placeholder="e.g. Monthly hosting" />
+                </div>
+                <div class="row g-2 mb-2">
+                    <div class="col-4">
+                        <label class="form-label small mb-1" for="editorUnit">Unit</label>
+                        <select id="editorUnit" class="form-select">
+                            @foreach (var unit in units)
+                            {
+                                <option value="@unit">@unit</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-4">
+                        <label class="form-label small mb-1" for="editorQuantity">Qty</label>
+                        <input id="editorQuantity" type="number" step="0.001" min="0.001" class="form-control" inputmode="decimal" placeholder="1" />
+                    </div>
+                    <div class="col-4">
+                        <label class="form-label small mb-1" for="editorRate">Rate (R)</label>
+                        <input id="editorRate" type="number" step="0.01" min="0" class="form-control" inputmode="decimal" placeholder="0.00" />
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="small text-muted">Line total</span>
+                    <strong id="editorAmount" class="text-primary">R 0.00</strong>
+                </div>
+                <div id="editorError" class="text-danger small mt-2 d-none" role="alert"></div>
+                <button type="button" id="saveItem" class="btn btn-primary w-100 mt-3">
+                    <i class="bi bi-check-lg"></i> <span>Add line item</span>
+                </button>
+            </button>
+            <button type="button" class="btn btn-primary item-add-trigger @(hasLineItems ? "" : "d-none")" id="addBlankRow" title="Add line item" aria-label="Add line item">
+                <i class="bi bi-plus-lg" aria-hidden="true"></i>
             </button>
 
             <div class="d-flex justify-content-between align-items-center mt-3 px-1">
@@ -221,46 +244,6 @@
 
 </form>
 
-<!-- Row template cloned by JS for new / saved-rate lines -->
-<template id="rowTemplate">
-    <div class="line-item border rounded p-2 mb-2">
-        <div class="line-item-heading">
-            <span class="li-index">Line</span>
-        </div>
-        <div class="mb-2">
-            <input name="Items[0].Description" class="form-control li-desc" placeholder="Description" />
-        </div>
-        <div class="row g-2 mb-2">
-            <div class="col-4">
-                <label class="form-label small mb-1">Unit</label>
-                <select name="Items[0].Unit" class="form-select li-unit">
-                    @foreach (var u in units)
-                    {
-                        <option value="@u">@u</option>
-                    }
-                </select>
-            </div>
-            <div class="col-4">
-                <label class="form-label small mb-1">Qty</label>
-                <input name="Items[0].Quantity" type="number" step="0.001" class="form-control li-qty" placeholder="Qty" />
-            </div>
-            <div class="col-4">
-                <label class="form-label small mb-1">Rate (R)</label>
-                <input name="Items[0].Rate" type="number" step="0.01" class="form-control li-rate" placeholder="Rate" />
-            </div>
-        </div>
-        <div class="d-flex justify-content-between align-items-center">
-            <div class="line-item-total">
-                <span>Line total</span>
-                <strong class="li-amount">R 0.00</strong>
-            </div>
-            <button type="button" class="btn btn-sm btn-outline-danger li-remove" style="min-width: 44px; min-height: 44px;">
-                <i class="bi bi-trash"></i>
-            </button>
-        </div>
-    </div>
-</template>
-
 @section Scripts {
     <script>
         function toggleReissue(cb) {
@@ -269,41 +252,159 @@
 
         (function () {
             const container = document.getElementById('lineItems');
-            const template = document.getElementById('rowTemplate');
             const picker = document.getElementById('savedRatePicker');
+            const editor = document.getElementById('itemEditor');
+            const editorTitle = document.getElementById('itemEditorTitle');
+            const editorDescription = document.getElementById('editorDescription');
+            const editorUnit = document.getElementById('editorUnit');
+            const editorQuantity = document.getElementById('editorQuantity');
+            const editorRate = document.getElementById('editorRate');
+            const editorAmount = document.getElementById('editorAmount');
+            const editorError = document.getElementById('editorError');
+            const saveItemButton = document.getElementById('saveItem');
+            const addButton = document.getElementById('addBlankRow');
+            let editingRow = null;
 
             // Model binding needs Items[0..n] with no gaps; renumber after every add/remove.
             function reindex() {
-                container.querySelectorAll('.line-item').forEach((row, i) => {
-                    row.querySelector('.li-index').textContent = 'Line ' + (i + 1);
-                    row.querySelectorAll('[name]').forEach(el => {
-                        el.name = el.name.replace(/Items\[\d+\]/, 'Items[' + i + ']');
+                container.querySelectorAll('.invoice-item-row').forEach((row, i) => {
+                    row.querySelectorAll('[data-field]').forEach(input => {
+                        input.name = 'Items[' + i + '].' + input.dataset.field;
                     });
+                    row.querySelector('.invoice-item-number').textContent = i + 1;
                 });
-            }
-
-            function rowAmount(row) {
-                const qty = parseFloat(row.querySelector('.li-qty').value) || 0;
-                const rate = parseFloat(row.querySelector('.li-rate').value) || 0;
-                return qty * rate;
             }
 
             function recalc() {
                 let total = 0;
-                container.querySelectorAll('.line-item').forEach(row => {
-                    const amt = rowAmount(row);
-                    row.querySelector('.li-amount').textContent = 'R ' + amt.toFixed(2);
-                    total += amt;
+                container.querySelectorAll('.invoice-item-row').forEach(row => {
+                    const quantity = parseFloat(row.querySelector('[data-field="Quantity"]').value) || 0;
+                    const rate = parseFloat(row.querySelector('[data-field="Rate"]').value) || 0;
+                    const amount = quantity * rate;
+                    row.querySelector('.item-amount').textContent = 'R ' + amount.toFixed(2);
+                    total += amount;
                 });
                 document.getElementById('liTotal').textContent = 'R ' + total.toFixed(2);
                 const mobileTotal = document.getElementById('mobileLiTotal');
                 if (mobileTotal) mobileTotal.textContent = 'R ' + total.toFixed(2);
             }
 
+            function updateEditorAmount() {
+                const quantity = parseFloat(editorQuantity.value) || 0;
+                const rate = parseFloat(editorRate.value) || 0;
+                editorAmount.textContent = 'R ' + (quantity * rate).toFixed(2);
+            }
+
+            function showEditor(visible) {
+                editor.classList.toggle('d-none', !visible);
+                addButton.classList.toggle('d-none', visible);
+                if (visible) {
+                    editorDescription.focus();
+                    editor.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }
+
+            function resetEditor() {
+                editingRow = null;
+                editorTitle.textContent = 'New line item';
+                saveItemButton.querySelector('span').textContent = 'Add line item';
+                editorDescription.value = '';
+                editorUnit.selectedIndex = 0;
+                editorQuantity.value = '';
+                editorRate.value = '';
+                editorError.textContent = '';
+                editorError.classList.add('d-none');
+                updateEditorAmount();
+            }
+
+            function createHiddenField(field, value) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.dataset.field = field;
+                input.value = value;
+                return input;
+            }
+
+            function createRow(values) {
+                const row = document.createElement('article');
+                row.className = 'invoice-item-row';
+                row.append(
+                    createHiddenField('Description', values.description),
+                    createHiddenField('Unit', values.unit),
+                    createHiddenField('Quantity', values.quantity),
+                    createHiddenField('Rate', values.rate));
+
+                const main = document.createElement('div');
+                main.className = 'invoice-item-main';
+                const number = document.createElement('span');
+                number.className = 'invoice-item-number';
+                const description = document.createElement('div');
+                description.className = 'invoice-item-description';
+                const descriptionText = document.createElement('strong');
+                descriptionText.className = 'item-description';
+                const meta = document.createElement('span');
+                meta.className = 'item-meta';
+                const amount = document.createElement('strong');
+                amount.className = 'item-amount';
+                description.append(descriptionText, meta);
+                main.append(number, description, amount);
+
+                const actions = document.createElement('div');
+                actions.className = 'invoice-item-actions';
+                const edit = document.createElement('button');
+                edit.type = 'button';
+                edit.className = 'btn btn-outline-primary item-edit';
+                edit.title = 'Edit line';
+                edit.setAttribute('aria-label', 'Edit line');
+                edit.innerHTML = '<i class="bi bi-pencil"></i>';
+                const remove = document.createElement('button');
+                remove.type = 'button';
+                remove.className = 'btn btn-outline-danger item-remove';
+                remove.title = 'Remove line';
+                remove.setAttribute('aria-label', 'Remove line');
+                remove.innerHTML = '<i class="bi bi-trash"></i>';
+                actions.append(edit, remove);
+                row.append(main, actions);
+                renderRow(row, values);
+                wireRow(row);
+                return row;
+            }
+
+            function getRowValues(row) {
+                return {
+                    description: row.querySelector('[data-field="Description"]').value,
+                    unit: row.querySelector('[data-field="Unit"]').value,
+                    quantity: row.querySelector('[data-field="Quantity"]').value,
+                    rate: row.querySelector('[data-field="Rate"]').value
+                };
+            }
+
+            function renderRow(row, values) {
+                row.querySelector('[data-field="Description"]').value = values.description;
+                row.querySelector('[data-field="Unit"]').value = values.unit;
+                row.querySelector('[data-field="Quantity"]').value = values.quantity;
+                row.querySelector('[data-field="Rate"]').value = values.rate;
+                row.querySelector('.item-description').textContent = values.description;
+                row.querySelector('.item-meta').textContent = values.quantity + ' ' + values.unit + ' × R ' + Number(values.rate).toFixed(2);
+                row.querySelector('.item-amount').textContent = 'R ' + (Number(values.quantity) * Number(values.rate)).toFixed(2);
+            }
+
             function wireRow(row) {
-                row.querySelectorAll('.li-qty, .li-rate').forEach(inp =>
-                    inp.addEventListener('input', recalc));
-                row.querySelector('.li-remove').addEventListener('click', () => {
+                row.querySelector('.item-edit').addEventListener('click', () => {
+                    editingRow = row;
+                    const values = getRowValues(row);
+                    editorTitle.textContent = 'Edit line item';
+                    saveItemButton.querySelector('span').textContent = 'Update line item';
+                    editorDescription.value = values.description;
+                    editorUnit.value = values.unit;
+                    editorQuantity.value = values.quantity;
+                    editorRate.value = values.rate;
+                    editorError.classList.add('d-none');
+                    updateEditorAmount();
+                    showEditor(true);
+                });
+
+                row.querySelector('.item-remove').addEventListener('click', () => {
                     row.remove();
                     reindex();
                     recalc();
@@ -311,39 +412,65 @@
             }
 
             function addRow(values) {
-                const node = template.content.firstElementChild.cloneNode(true);
-                if (values) {
-                    if (values.desc != null) node.querySelector('.li-desc').value = values.desc;
-                    if (values.unit) {
-                        const unitSel = node.querySelector('.li-unit');
-                        // Match case-insensitively so a saved unit like "Monthly" still maps to "monthly".
-                        const match = [...unitSel.options].find(o => o.value.toLowerCase() === values.unit.toLowerCase());
-                        if (match) unitSel.value = match.value;
-                    }
-                    node.querySelector('.li-qty').value = values.qty != null ? values.qty : 1;
-                    if (values.rate != null) node.querySelector('.li-rate').value = values.rate;
-                }
-                container.appendChild(node);
-                wireRow(node);
+                const row = createRow(values);
+                container.appendChild(row);
                 reindex();
                 recalc();
-                return node;
             }
 
-            // Wire any server-rendered rows (initial row, or rows kept after a validation error).
-            container.querySelectorAll('.line-item').forEach(wireRow);
-            // Always have at least one row to type into.
-            if (!container.querySelector('.line-item')) addRow();
+            function saveEditorItem() {
+                const values = {
+                    description: editorDescription.value.trim(),
+                    unit: editorUnit.value,
+                    quantity: editorQuantity.value,
+                    rate: editorRate.value
+                };
+                const quantity = Number(values.quantity);
+                const rate = Number(values.rate);
+                if (!values.description || !values.quantity || !Number.isFinite(quantity) || quantity <= 0 || values.rate === '' || !Number.isFinite(rate) || rate < 0) {
+                    editorError.textContent = 'Enter a description, quantity greater than zero, and a valid rate.';
+                    editorError.classList.remove('d-none');
+                    return;
+                }
+
+                if (editingRow) {
+                    renderRow(editingRow, values);
+                } else {
+                    container.appendChild(createRow(values));
+                }
+
+                reindex();
+                recalc();
+                resetEditor();
+                showEditor(false);
+            }
+
+            container.querySelectorAll('.invoice-item-row').forEach(wireRow);
+            reindex();
             recalc();
 
-            document.getElementById('addBlankRow').addEventListener('click', () => addRow());
+            addButton.addEventListener('click', () => {
+                resetEditor();
+                showEditor(true);
+            });
+            document.getElementById('closeItemEditor').addEventListener('click', () => {
+                resetEditor();
+                showEditor(false);
+            });
+            saveItemButton.addEventListener('click', saveEditorItem);
+            editorQuantity.addEventListener('input', updateEditorAmount);
+            editorRate.addEventListener('input', updateEditorAmount);
 
             if (picker) {
                 picker.addEventListener('change', () => {
                     const opt = picker.selectedOptions[0];
                     if (!opt || !opt.value) return;
-                    addRow({ desc: opt.value, unit: opt.dataset.unit, rate: opt.dataset.rate, qty: 1 });
+                    addRow({ description: opt.value, unit: opt.dataset.unit, rate: opt.dataset.rate, quantity: '1' });
                     picker.value = '';
+                    if (!editor.classList.contains('d-none')) {
+                        resetEditor();
+                        showEditor(false);
+                    }
                 });
             }
         })();
