@@ -6,7 +6,7 @@ namespace InvoiceApp.Tests.Services;
 public class InvoiceEmailComposerTests
 {
     [Fact]
-    public void Compose_IncludesCompanyContactAndProfessionalAttachmentName()
+    public void Compose_CreatesPlainTextEmailWithCompanyPhoneAndProfessionalAttachmentName()
     {
         var invoice = new Invoice
         {
@@ -24,23 +24,18 @@ public class InvoiceEmailComposerTests
             Phone = "0735904108"
         };
 
-        var email = InvoiceEmailComposer.Compose(invoice, company, company.Name, "mail@gcweproperty.co.za");
+        var email = InvoiceEmailComposer.Compose(invoice, company, company.Name);
 
         Assert.Equal("Invoice INV-003 from BlackTech Empower", email.Subject);
         Assert.Equal("Invoice-INV-003-BlackTech-Empower.pdf", email.PdfFileName);
-        Assert.Contains("Give Compassion NPC", email.HtmlBody);
-        Assert.Contains(">BE</td>", email.HtmlBody);
-        Assert.DoesNotContain("INV-003", email.HtmlBody);
-        Assert.Contains("Please find the invoice attached for your review and payment.", email.HtmlBody);
-        Assert.Contains("15 Ebor Ave, Durban, 4000", email.HtmlBody);
-        Assert.Contains("0735904108", email.HtmlBody);
-        Assert.Contains("mail@gcweproperty.co.za", email.HtmlBody);
+        Assert.DoesNotContain("INV-003", email.Body);
+        Assert.DoesNotContain("<html", email.Body, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("Please find the invoice attached for your review and payment.", email.Body);
-        Assert.Contains("Kind regards,\nBlackTech Empower", email.Body);
+        Assert.EndsWith("Kind regards,\nBlackTech Empower\n0735904108", email.Body);
     }
 
     [Fact]
-    public void Compose_HtmlEncodesUserProvidedTextAndSanitizesFilename()
+    public void Compose_PlainTextUsesClientNameAndSanitizesFilename()
     {
         var invoice = new Invoice
         {
@@ -51,10 +46,9 @@ public class InvoiceEmailComposerTests
         };
         var company = new CompanySettings { Name = "A&B Services" };
 
-        var email = InvoiceEmailComposer.Compose(invoice, company, company.Name, "billing@example.com");
+        var email = InvoiceEmailComposer.Compose(invoice, company, company.Name);
 
-        Assert.Contains("A&amp;B &lt;Client&gt;", email.HtmlBody);
-        Assert.DoesNotContain("INV/004 &lt;draft&gt;", email.HtmlBody);
+        Assert.Contains("Good day A&B <Client>", email.Body);
         Assert.Equal("Invoice-INV-004-draft-A-B-Services.pdf", email.PdfFileName);
     }
 }

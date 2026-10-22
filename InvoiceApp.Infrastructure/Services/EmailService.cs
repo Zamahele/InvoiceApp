@@ -1,4 +1,3 @@
-using System.Net;
 using System.Text.RegularExpressions;
 using InvoiceApp.Core.Entities;
 using MailKit.Net.Smtp;
@@ -19,90 +18,36 @@ public record EmailSendRequest(
     string ToEmail,
     string Subject,
     string Body,
-        string HtmlBody,
     byte[] PdfBytes,
     string PdfFileName);
 
-public sealed record InvoiceEmailContent(string Subject, string Body, string HtmlBody, string PdfFileName);
+public sealed record InvoiceEmailContent(string Subject, string Body, string PdfFileName);
 
 public static class InvoiceEmailComposer
 {
-        public static InvoiceEmailContent Compose(Invoice invoice, CompanySettings? company, string fromName, string fromEmail)
-        {
-                var companyName = string.IsNullOrWhiteSpace(company?.Name)
-                        ? (string.IsNullOrWhiteSpace(fromName) ? "Your company" : fromName.Trim())
-                        : company.Name.Trim();
-                var safeCompany = WebUtility.HtmlEncode(companyName);
-                var safeMark = WebUtility.HtmlEncode(GetCompanyMark(companyName));
-                var safeClientName = WebUtility.HtmlEncode(invoice.ClientName);
-                var address = string.Join(", ", new[]
-                {
-                        company?.AddressLine1,
-                        company?.AddressLine2,
-                        company?.City,
-                        company?.PostalCode
-                }.Where(value => !string.IsNullOrWhiteSpace(value)));
+    public static InvoiceEmailContent Compose(Invoice invoice, CompanySettings? company, string fromName)
+    {
+        var companyName = string.IsNullOrWhiteSpace(company?.Name)
+            ? (string.IsNullOrWhiteSpace(fromName) ? "Your company" : fromName.Trim())
+            : company.Name.Trim();
+        var phone = company?.Phone?.Trim();
+        var signature = string.IsNullOrWhiteSpace(phone)
+            ? $"Kind regards,\n{companyName}"
+            : $"Kind regards,\n{companyName}\n{phone}";
+        var safeFileInvoice = ToFilePart(invoice.InvoiceNumber, "Invoice");
+        var safeFileCompany = ToFilePart(companyName, "Company");
 
-                var contactLines = new List<string>();
-                if (!string.IsNullOrWhiteSpace(address))
-                        contactLines.Add($"<div style=\"margin-top:5px;color:#526276;font-size:14px;line-height:21px;\">{WebUtility.HtmlEncode(address)}</div>");
-                if (!string.IsNullOrWhiteSpace(company?.Phone))
-                        contactLines.Add($"<div style=\"margin-top:5px;color:#526276;font-size:14px;line-height:21px;\">{WebUtility.HtmlEncode(company.Phone)}</div>");
-                if (!string.IsNullOrWhiteSpace(fromEmail))
-                        contactLines.Add($"<div style=\"margin-top:5px;font-size:14px;line-height:21px;\"><a href=\"mailto:{WebUtility.HtmlEncode(fromEmail)}\" style=\"color:#0f3460;text-decoration:none;\">{WebUtility.HtmlEncode(fromEmail)}</a></div>");
+        return new InvoiceEmailContent(
+            Subject: $"Invoice {invoice.InvoiceNumber} from {companyName}",
+            Body: $"Good day {invoice.ClientName},\n\nPlease find the invoice attached for your review and payment.\n\n{signature}",
+            PdfFileName: $"Invoice-{safeFileInvoice}-{safeFileCompany}.pdf");
+    }
 
-                var html = $"""
-                        <!doctype html>
-                        <html lang="en">
-                        <body style="margin:0;padding:0;background-color:#f2f4f7;font-family:Arial,Helvetica,sans-serif;color:#243247;">
-                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#f2f4f7;padding:28px 12px;">
-                                <tr><td align="center">
-                                    <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="width:100%;max-width:600px;background:#ffffff;border:1px solid #e2e7ed;border-radius:8px;overflow:hidden;">
-                                        <tr><td style="background:#0f3460;padding:25px 30px;border-bottom:4px solid #c9a84c;">
-                                            <table role="presentation" cellspacing="0" cellpadding="0"><tr>
-                                                <td align="center" valign="middle" width="42" height="42" style="width:42px;height:42px;background:#c9a84c;border-radius:6px;color:#0f3460;font-size:15px;font-weight:bold;">{safeMark}</td>
-                                                <td style="padding-left:12px;color:#f0c96a;font-size:15px;font-weight:bold;">{safeCompany}</td>
-                                            </tr></table>
-                                            <div style="margin-top:15px;color:#ffffff;font-size:23px;font-weight:bold;">Invoice attached</div>
-                                        </td></tr>
-                                        <tr><td style="padding:28px 30px 18px;">
-                                            <div style="font-size:16px;line-height:25px;">Hello {safeClientName},</div>
-                                            <p style="margin:14px 0;color:#526276;font-size:15px;line-height:24px;">Please find the invoice attached for your review and payment.</p>
-                                            <p style="margin:14px 0;color:#526276;font-size:15px;line-height:24px;">If you have any questions or need further information, please contact us using the details below.</p>
-                                            <p style="margin:22px 0 0;color:#526276;font-size:14px;line-height:22px;">Kind regards,<br><strong style="color:#0a2444;">{safeCompany}</strong></p>
-                                        </td></tr>
-                                        <tr><td style="padding:18px 30px 22px;background:#f8fafc;border-top:1px solid #e2e7ed;">
-                                            <div style="color:#0a2444;font-size:11px;font-weight:bold;letter-spacing:1.2px;text-transform:uppercase;">Company contact</div>
-                                            {string.Join("\n", contactLines)}
-                                        </td></tr>
-                                    </table>
-                                </td></tr>
-                            </table>
-                        </body>
-                        </html>
-                        """;
-
-                var safeFileInvoice = ToFilePart(invoice.InvoiceNumber, "Invoice");
-                var safeFileCompany = ToFilePart(companyName, "Company");
-                return new InvoiceEmailContent(
-                        Subject: $"Invoice {invoice.InvoiceNumber} from {companyName}",
-                    Body: $"Good day {invoice.ClientName},\n\nPlease find the invoice attached for your review and payment.\n\nIf you have any questions or need further information, please contact us.\n\nKind regards,\n{companyName}\n{address}\n{company?.Phone}\n{fromEmail}",
-                        HtmlBody: html,
-                        PdfFileName: $"Invoice-{safeFileInvoice}-{safeFileCompany}.pdf");
-        }
-
-        private static string ToFilePart(string value, string fallback)
-        {
-                var part = Regex.Replace(value, "[^A-Za-z0-9]+", "-").Trim('-');
-                return string.IsNullOrWhiteSpace(part) ? fallback : part;
-        }
-
-        private static string GetCompanyMark(string companyName)
-        {
-            var words = Regex.Matches(companyName, "[A-Za-z0-9]+").Select(match => match.Value).ToList();
-            if (words.Count == 0) return "CO";
-            return string.Concat(words.Take(2).Select(word => char.ToUpperInvariant(word[0])));
-        }
+    private static string ToFilePart(string value, string fallback)
+    {
+        var part = Regex.Replace(value, "[^A-Za-z0-9]+", "-").Trim('-');
+        return string.IsNullOrWhiteSpace(part) ? fallback : part;
+    }
 }
 
 public interface IEmailService
@@ -125,7 +70,7 @@ public class EmailService : IEmailService
         message.To.Add(MailboxAddress.Parse(request.ToEmail));
         message.Subject = request.Subject;
 
-        var builder = new BodyBuilder { TextBody = request.Body, HtmlBody = request.HtmlBody };
+        var builder = new BodyBuilder { TextBody = request.Body };
         builder.Attachments.Add(request.PdfFileName, request.PdfBytes, ContentType.Parse("application/pdf"));
         message.Body = builder.ToMessageBody();
 

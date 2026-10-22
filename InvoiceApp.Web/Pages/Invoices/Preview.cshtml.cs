@@ -87,8 +87,7 @@ public class PreviewModel : PageModel
             var emailContent = InvoiceEmailComposer.Compose(
                 invoice,
                 company,
-                string.IsNullOrWhiteSpace(settings.FromName) ? companyName : settings.FromName,
-                settings.FromEmail);
+                string.IsNullOrWhiteSpace(settings.FromName) ? companyName : settings.FromName);
 
             await _email.SendInvoiceAsync(new EmailSendRequest(
                 SmtpHost: settings.SmtpHost,
@@ -101,7 +100,6 @@ public class PreviewModel : PageModel
                 ToEmail: invoice.ClientEmail!,
                 Subject: emailContent.Subject,
                 Body: emailContent.Body,
-                HtmlBody: emailContent.HtmlBody,
                 PdfBytes: pdf,
                 PdfFileName: emailContent.PdfFileName));
 
