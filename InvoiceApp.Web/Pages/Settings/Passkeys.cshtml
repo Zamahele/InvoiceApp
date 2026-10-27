@@ -1,0 +1,140 @@
+@page
+@model InvoiceApp.Web.Pages.Settings.PasskeysModel
+@{
+    ViewData["Title"] = "Passkeys";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <span class="page-eyebrow">Account security</span>
+        <h1 class="h4 fw-bold mb-0">Passkeys</h1>
+    </div>
+    <a href="/Settings" class="btn btn-sm btn-outline-secondary" aria-label="Back to settings">
+        <i class="bi bi-arrow-left"></i><span class="d-none d-sm-inline ms-1">Settings</span>
+    </a>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+{
+    <div class="alert alert-success py-2" role="status">@Model.StatusMessage</div>
+}
+
+@if (!Model.PasskeysAvailable)
+{
+    <div class="alert alert-warning">
+        Passkeys require a secure HTTPS connection. On localhost, HTTP is allowed for development. The production site needs a valid HTTPS certificate before passkeys can be registered or used.
+    </div>
+}
+
+<section class="card mb-3">
+    <div class="card-header"><i class="bi bi-fingerprint me-2"></i>Sign in with this device</div>
+    <div class="card-body">
+        <p class="text-muted mb-3">Use your phone’s screen lock, fingerprint, or face recognition to sign in. Your password will continue to work as a recovery option.</p>
+        <form method="post" asp-page-handler="Toggle" class="mb-3" id="passkeyToggleForm">
+            <div class="form-check form-switch">
+                <input asp-for="PasskeysEnabled" class="form-check-input" role="switch" />
+                <label asp-for="PasskeysEnabled" class="form-check-label">Enable passkey sign-in</label>
+            </div>
+            <div class="form-text mb-2">Off by default. Changes save automatically. Turning this off blocks passkey sign-in but keeps registered devices.</div>
+            <noscript>
+                <button type="submit" class="btn btn-outline-primary btn-sm mt-2">Save passkey setting</button>
+            </noscript>
+        </form>
+        @if (Model.PasskeysEnabled)
+        {
+        <form id="passkeyTokenForm" method="post">
+            @Html.AntiForgeryToken()
+            <div class="mb-3">
+                <label for="passkeyName" class="form-label">Device name</label>
+                <input id="passkeyName" class="form-control" maxlength="100" value="My device" autocomplete="off" />
+            </div>
+            <button id="registerPasskey" type="button" class="btn btn-primary w-100" @(Model.PasskeysAvailable ? null : "disabled")>
+                <i class="bi bi-plus-lg"></i> Add passkey
+            </button>
+            <div id="passkeyMessage" class="small mt-2" role="status" aria-live="polite"></div>
+        </form>
+        }
+        else
+        {
+            <div class="small text-muted">Enable passkey sign-in to register a device.</div>
+        }
+    </div>
+</section>
+
+<section class="card">
+    <div class="card-header">Registered devices</div>
+    @if (Model.Credentials.Count == 0)
+    {
+        <div class="card-body text-muted">No passkeys registered for this account yet.</div>
+    }
+    else
+    {
+        <div class="list-group list-group-flush">
+            @foreach (var credential in Model.Credentials)
+            {
+                <div class="list-group-item d-flex justify-content-between align-items-center gap-3">
+                    <div class="min-w-0">
+                        <div class="fw-semibold text-truncate"><i class="bi bi-phone me-2 text-primary"></i>@credential.Name</div>
+                        <div class="small text-muted">Added @credential.CreatedAt.ToLocalTime().ToString("dd MMM yyyy")
+                            @if (credential.LastUsedAt.HasValue)
+                            {
+                                <span> · Last used @credential.LastUsedAt.Value.ToLocalTime().ToString("dd MMM yyyy")</span>
+                            }
+                        </div>
+                    </div>
+                    <form method="post" asp-page-handler="Remove" asp-route-id="@credential.Id" class="flex-shrink-0">
+                        <button type="submit" class="btn btn-outline-danger btn-sm" title="Remove passkey" aria-label="Remove @credential.Name">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </form>
+                </div>
+            }
+        </div>
+    }
+</section>
+
+@section Scripts {
+    <script src="~/js/passkeys.js" asp-append-version="true"></script>
+    <script>
+        (function () {
+            var toggle = document.getElementById('PasskeysEnabled');
+            var toggleForm = document.getElementById('passkeyToggleForm');
+            if (toggle && toggleForm) {
+                toggle.addEventListener('change', function () {
+                    if (toggleForm.requestSubmit) toggleForm.requestSubmit(); else toggleForm.submit();
+                });
+            }
+
+            var button = document.getElementById('registerPasskey');
+            var message = document.getElementById('passkeyMessage');
+            var name = document.getElementById('passkeyName');
+            if (!button || button.disabled) return;
+
+            if (!window.PublicKeyCredential) {
+                button.disabled = true;
+                message.textContent = 'This browser does not support passkeys.';
+                return;
+            }
+
+            button.addEventListener('click', async function () {
+                button.disabled = true;
+                message.textContent = 'Follow your device prompt to create a passkey...';
+                try {
+                    var options = await PasskeyClient.post('?handler=RegistrationOptions', new URLSearchParams(), false);
+                    var credential = await navigator.credentials.create({ publicKey: PasskeyClient.createOptions(options) });
+                    await PasskeyClient.post('?handler=Register', {
+                        name: name.value.trim(),
+                        response: PasskeyClient.serializeCredential(credential)
+                    }, true);
+                    message.textContent = 'Passkey added to this account.';
+                    window.location.reload();
+                } catch (error) {
+                    message.textContent = error.name === 'NotAllowedError'
+                        ? 'Passkey setup was cancelled.'
+                        : error.message || 'Could not register this passkey.';
+                    button.disabled = false;
+                }
+            });
+        })();
+    </script>
+}

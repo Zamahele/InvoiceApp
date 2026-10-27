@@ -38,6 +38,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Property> Properties => Set<Property>();
     public DbSet<ErrorLog> ErrorLogs => Set<ErrorLog>();
     public DbSet<EmailSettings> EmailSettings => Set<EmailSettings>();
+    public DbSet<PasskeyCredential> PasskeyCredentials => Set<PasskeyCredential>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -153,6 +154,19 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
         modelBuilder.Entity<Room>().HasQueryFilter(e => !_companyId.HasValue || e.CompanyId == _companyId);
         modelBuilder.Entity<RentPayment>().HasQueryFilter(e => !_companyId.HasValue || e.CompanyId == _companyId);
         modelBuilder.Entity<EmailSettings>().HasQueryFilter(e => !_companyId.HasValue || e.CompanyId == _companyId);
+        modelBuilder.Entity<PasskeyCredential>(entity =>
+        {
+            entity.Property(credential => credential.CredentialId).HasMaxLength(512).IsRequired();
+            entity.Property(credential => credential.UserId).HasMaxLength(450).IsRequired();
+            entity.Property(credential => credential.Name).HasMaxLength(100).IsRequired();
+            entity.HasIndex(credential => credential.CredentialId).IsUnique();
+            entity.HasIndex(credential => new { credential.CompanyId, credential.UserId });
+            entity.HasOne<ApplicationUser>()
+                .WithMany()
+                .HasForeignKey(credential => credential.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+        modelBuilder.Entity<PasskeyCredential>().HasQueryFilter(e => !_companyId.HasValue || e.CompanyId == _companyId);
         // LineItem isn't tenant-owned directly; match its parent Invoice's filter so the
         // required Invoice->LineItem relationship stays consistent under filtering.
         modelBuilder.Entity<LineItem>().HasQueryFilter(l => !_companyId.HasValue || l.Invoice.CompanyId == _companyId);

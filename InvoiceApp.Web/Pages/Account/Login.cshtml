@@ -12,6 +12,7 @@
 
                 <form method="post">
                     <div asp-validation-summary="All" class="text-danger small mb-2"></div>
+                    @Html.AntiForgeryToken()
 
                     <div class="mb-3">
                         <label asp-for="Input.Email" class="form-label"></label>
@@ -33,6 +34,12 @@
                     <button type="submit" class="btn btn-primary w-100">Sign in</button>
                 </form>
 
+                <div class="login-divider"><span>or</span></div>
+                <button type="button" id="passkeySignIn" class="btn btn-outline-primary w-100">
+                    <i class="bi bi-fingerprint"></i> Sign in with a passkey
+                </button>
+                <div id="passkeyMessage" class="small text-center mt-2" role="status" aria-live="polite"></div>
+
                 <p class="text-center mt-3 mb-0 small">
                     New here? <a href="/Account/Register">Create a company</a>
                 </p>
@@ -43,4 +50,43 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/passkeys.js" asp-append-version="true"></script>
+    <script>
+        (function () {
+            var button = document.getElementById('passkeySignIn');
+            var message = document.getElementById('passkeyMessage');
+            var email = document.getElementById('Input_Email');
+
+            if (!window.PublicKeyCredential) {
+                button.disabled = true;
+                message.textContent = 'Passkeys are not supported by this browser.';
+                return;
+            }
+            if (!window.isSecureContext && location.hostname !== 'localhost') {
+                button.disabled = true;
+                message.textContent = 'Passkeys require a secure HTTPS connection.';
+                return;
+            }
+
+            button.addEventListener('click', async function () {
+                button.disabled = true;
+                message.textContent = 'Waiting for your passkey...';
+                try {
+                    var form = new URLSearchParams();
+                    form.set('email', email.value.trim());
+                    var options = await PasskeyClient.post('?handler=PasskeyOptions', form, false);
+                    var credential = await navigator.credentials.get({ publicKey: PasskeyClient.requestOptions(options) });
+                    var returnUrl = new URLSearchParams(location.search).get('ReturnUrl');
+                    var finishUrl = '?handler=PasskeyLogin' + (returnUrl ? '&returnUrl=' + encodeURIComponent(returnUrl) : '');
+                    var result = await PasskeyClient.post(finishUrl, PasskeyClient.serializeCredential(credential), true);
+                    location.assign(result.redirectUrl);
+                } catch (error) {
+                    message.textContent = error.name === 'NotAllowedError'
+                        ? 'Passkey sign-in was cancelled or unavailable.'
+                        : error.message || 'Passkey sign-in failed.';
+                    button.disabled = false;
+                }
+            });
+        })();
+    </script>
 }

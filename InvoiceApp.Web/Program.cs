@@ -3,6 +3,7 @@ using InvoiceApp.Infrastructure.Identity;
 using InvoiceApp.Infrastructure.Tenancy;
 using InvoiceApp.Web.Tenancy;
 using InvoiceApp.Web.Services;
+using Fido2NetLib;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using QuestPDF.Infrastructure;
@@ -12,6 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 QuestPDF.Settings.License = LicenseType.Community;
 
 var invoiceConnectionString = Environment.GetEnvironmentVariable("invoiceapp_ConnectionString")
+    ?? Environment.GetEnvironmentVariable("invoiceapp_ConnectionString", EnvironmentVariableTarget.User)
     ?? builder.Configuration.GetConnectionString("DefaultConnection");
 if (string.IsNullOrWhiteSpace(invoiceConnectionString))
 {
@@ -21,6 +23,30 @@ if (string.IsNullOrWhiteSpace(invoiceConnectionString))
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(invoiceConnectionString));
+
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(5);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+    options.Cookie.SameSite = SameSiteMode.Strict;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+});
+
+var passkeyRpId = builder.Configuration["Passkeys:RpId"]
+    ?? (builder.Environment.IsDevelopment() ? "localhost" : "blacktech.gcweproperty.co.za");
+var passkeyOrigins = builder.Configuration.GetSection("Passkeys:Origins").Get<string[]>()
+    ?? (builder.Environment.IsDevelopment()
+        ? new[] { "http://localhost:5000", "https://localhost:5001" }
+        : new[] { "https://blacktech.gcweproperty.co.za" });
+
+builder.Services.AddFido2(options =>
+{
+    options.RPID = passkeyRpId;
+    options.RPName = "BlackTech Portal";
+    options.Origins = passkeyOrigins.ToHashSet(StringComparer.OrdinalIgnoreCase);
+});
 
 builder.Services
     .AddIdentity<ApplicationUser, IdentityRole>(options =>
@@ -113,6 +139,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapRazorPages();
