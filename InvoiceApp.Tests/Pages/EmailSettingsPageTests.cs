@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace InvoiceApp.Tests.Pages;
@@ -131,4 +132,71 @@ public class EmailSettingsPageTests
         Assert.Equal("new.example.com", saved.SmtpHost);    // updated
         Assert.Equal("original-pw", protector.Unprotect(saved.Password)); // password preserved
     }
+
+    [Fact]
+    public async Task OnPost_Update_Requires_New_Password_When_Old_Key_Cannot_Read_Stored_Password()
+    {
+        const int companyId = 3;
+        var dbName = Guid.NewGuid().ToString();
+        using (var seed = CreateDb(dbName, companyId))
+        {
+            var oldProvider = new EphemeralDataProtectionProvider();
+            seed.EmailSettings.Add(new EmailSettings
+            {
+                SmtpHost = "old.example.com",
+                SmtpPort = 25,
+                Username = "old@example.com",
+                Password = oldProvider.CreateProtector(EmailProtection.Purpose).Protect("old-pw"),
+                FromEmail = "old@example.com",
+                FromName = "Old"
+            });
+            await seed.SaveChangesAsync();
+        }
+
+        using var db = CreateDb(dbName, companyId);
+        var model = CreateModel(db, new EphemeralDataProtectionProvider());
+        model.Input = ValidInput(password: null);
+
+        var result = await model.OnPostAsync();
+
+        Assert.IsType<PageResult>(result);
+        Assert.False(model.ModelState.IsValid);
+        Assert.True(model.ModelState.ContainsKey("Input.Password"));
+    }
+
+    [Fact]
+    public void DataProtection_KeyRing_Persists_Across_Provider_Restarts()
+    {
+        var keyDirectory = Path.Combine(Path.GetTempPath(), $"invoiceapp-dp-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(keyDirectory);
+        try
+        {
+            string encryptedPassword;
+            using (var firstProvider = CreateDataProtectionProvider(keyDirectory))
+            {
+                encryptedPassword = firstProvider.GetRequiredService<IDataProtectionProvider>()
+                    .CreateProtector(EmailProtection.Purpose)
+                    .Protect("smtp-secret");
+            }
+
+            using var restartedProvider = CreateDataProtectionProvider(keyDirectory);
+            var decryptedPassword = restartedProvider.GetRequiredService<IDataProtectionProvider>()
+                .CreateProtector(EmailProtection.Purpose)
+                .Unprotect(encryptedPassword);
+
+            Assert.Equal("smtp-secret", decryptedPassword);
+        }
+        finally
+        {
+            Directory.Delete(keyDirectory, recursive: true);
+        }
+    }
+
+    private static ServiceProvider CreateDataProtectionProvider(string keyDirectory) =>
+        new ServiceCollection()
+            .AddDataProtection()
+            .SetApplicationName("InvoiceApp")
+            .PersistKeysToFileSystem(new DirectoryInfo(keyDirectory))
+            .Services
+            .BuildServiceProvider();
 }

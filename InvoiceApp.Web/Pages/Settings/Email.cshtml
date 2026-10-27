@@ -51,8 +51,13 @@
             <div class="mb-2">
                 <label class="form-label">Password</label>
                 <input asp-for="Input.Password" type="password" class="form-control" autocomplete="new-password"
-                       placeholder="@(Model.HasStoredPassword ? "•••••••• (leave blank to keep current)" : "")" />
-                <div class="form-text">Stored encrypted. @(Model.HasStoredPassword ? "Leave blank to keep the existing password." : "")</div>
+                      placeholder="@(Model.HasStoredPassword ? "•••••••• (leave blank to keep current)" : "")" />
+                  <div class="form-text">
+                      Stored encrypted.
+                      @(Model.HasStoredPassword
+                       ? "Leave blank to keep the existing password."
+                       : "Enter the SMTP password to save or replace it.")
+                  </div>
             </div>
         </div>
     </div>

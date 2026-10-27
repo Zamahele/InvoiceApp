@@ -4,6 +4,7 @@ using InvoiceApp.Infrastructure.Tenancy;
 using InvoiceApp.Web.Tenancy;
 using InvoiceApp.Web.Services;
 using Fido2NetLib;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using QuestPDF.Infrastructure;
@@ -23,6 +24,14 @@ if (string.IsNullOrWhiteSpace(invoiceConnectionString))
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(invoiceConnectionString));
+
+var dataProtectionKeysPath = Path.Combine(builder.Environment.ContentRootPath, "keys");
+Directory.CreateDirectory(dataProtectionKeysPath);
+var dataProtectionBuilder = builder.Services.AddDataProtection()
+    .SetApplicationName("InvoiceApp")
+    .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionKeysPath));
+if (OperatingSystem.IsWindows())
+    dataProtectionBuilder.ProtectKeysWithDpapi(protectToLocalMachine: true);
 
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>

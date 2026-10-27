@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Security.Cryptography;
 using InvoiceApp.Core.Entities;
 using InvoiceApp.Infrastructure.Data;
 using Microsoft.AspNetCore.DataProtection;
@@ -64,14 +65,14 @@ public class EmailModel : PageModel
             Input.Username = s.Username;
             Input.FromEmail = s.FromEmail;
             Input.FromName = s.FromName;
-            HasStoredPassword = !string.IsNullOrEmpty(s.Password);
+            HasStoredPassword = HasReadablePassword(s.Password);
         }
     }
 
     public async Task<IActionResult> OnPostAsync()
     {
         var existing = await _db.EmailSettings.FirstOrDefaultAsync();
-        HasStoredPassword = existing != null && !string.IsNullOrEmpty(existing.Password);
+        HasStoredPassword = existing != null && HasReadablePassword(existing.Password);
 
         // A password is only mandatory the first time (otherwise the stored one is kept).
         if (!HasStoredPassword && string.IsNullOrWhiteSpace(Input.Password))
@@ -98,5 +99,20 @@ public class EmailModel : PageModel
         await _db.SaveChangesAsync();
         StatusMessage = "Email settings saved.";
         return RedirectToPage();
+    }
+
+    private bool HasReadablePassword(string? encryptedPassword)
+    {
+        if (string.IsNullOrEmpty(encryptedPassword)) return false;
+
+        try
+        {
+            _protector.Unprotect(encryptedPassword);
+            return true;
+        }
+        catch (CryptographicException)
+        {
+            return false;
+        }
     }
 }
