@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Routing;
@@ -167,36 +168,32 @@ public class EmailSettingsPageTests
     [Fact]
     public void DataProtection_KeyRing_Persists_Across_Provider_Restarts()
     {
-        var keyDirectory = Path.Combine(Path.GetTempPath(), $"invoiceapp-dp-{Guid.NewGuid():N}");
-        Directory.CreateDirectory(keyDirectory);
-        try
+        var dbName = $"invoiceapp-dp-{Guid.NewGuid():N}";
+        string encryptedPassword;
+        using (var firstProvider = CreateDataProtectionProvider(dbName))
         {
-            string encryptedPassword;
-            using (var firstProvider = CreateDataProtectionProvider(keyDirectory))
-            {
-                encryptedPassword = firstProvider.GetRequiredService<IDataProtectionProvider>()
-                    .CreateProtector(EmailProtection.Purpose)
-                    .Protect("smtp-secret");
-            }
-
-            using var restartedProvider = CreateDataProtectionProvider(keyDirectory);
-            var decryptedPassword = restartedProvider.GetRequiredService<IDataProtectionProvider>()
+            using var scope = firstProvider.CreateScope();
+            encryptedPassword = scope.ServiceProvider.GetRequiredService<IDataProtectionProvider>()
                 .CreateProtector(EmailProtection.Purpose)
-                .Unprotect(encryptedPassword);
+                .Protect("smtp-secret");
+        }
 
-            Assert.Equal("smtp-secret", decryptedPassword);
-        }
-        finally
-        {
-            Directory.Delete(keyDirectory, recursive: true);
-        }
+        using var restartedProvider = CreateDataProtectionProvider(dbName);
+        using var restartedScope = restartedProvider.CreateScope();
+        var decryptedPassword = restartedScope.ServiceProvider.GetRequiredService<IDataProtectionProvider>()
+            .CreateProtector(EmailProtection.Purpose)
+            .Unprotect(encryptedPassword);
+
+        Assert.Equal("smtp-secret", decryptedPassword);
     }
 
-    private static ServiceProvider CreateDataProtectionProvider(string keyDirectory) =>
-        new ServiceCollection()
-            .AddDataProtection()
+    private static ServiceProvider CreateDataProtectionProvider(string dbName)
+    {
+        var services = new ServiceCollection();
+        services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(dbName));
+        services.AddDataProtection()
             .SetApplicationName("InvoiceApp")
-            .PersistKeysToFileSystem(new DirectoryInfo(keyDirectory))
-            .Services
-            .BuildServiceProvider();
+            .PersistKeysToDbContext<AppDbContext>();
+        return services.BuildServiceProvider();
+    }
 }

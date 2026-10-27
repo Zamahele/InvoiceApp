@@ -25,11 +25,10 @@ if (string.IsNullOrWhiteSpace(invoiceConnectionString))
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(invoiceConnectionString));
 
-var dataProtectionKeysPath = Path.Combine(builder.Environment.ContentRootPath, "keys");
-Directory.CreateDirectory(dataProtectionKeysPath);
 var dataProtectionBuilder = builder.Services.AddDataProtection()
     .SetApplicationName("InvoiceApp")
-    .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionKeysPath));
+    .PersistKeysToDbContext<AppDbContext>();
+
 if (OperatingSystem.IsWindows())
     dataProtectionBuilder.ProtectKeysWithDpapi(protectToLocalMachine: true);
 

@@ -2,12 +2,13 @@ using InvoiceApp.Core;
 using InvoiceApp.Core.Entities;
 using InvoiceApp.Infrastructure.Identity;
 using InvoiceApp.Infrastructure.Tenancy;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace InvoiceApp.Infrastructure.Data;
 
-public class AppDbContext : IdentityDbContext<ApplicationUser>
+public class AppDbContext : IdentityDbContext<ApplicationUser>, IDataProtectionKeyContext
 {
     private readonly ICurrentCompanyProvider? _currentCompany;
 
@@ -39,6 +40,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<ErrorLog> ErrorLogs => Set<ErrorLog>();
     public DbSet<EmailSettings> EmailSettings => Set<EmailSettings>();
     public DbSet<PasskeyCredential> PasskeyCredentials => Set<PasskeyCredential>();
+    public DbSet<DataProtectionKey> DataProtectionKeys => Set<DataProtectionKey>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
