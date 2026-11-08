@@ -144,7 +144,20 @@ public class PasskeysModel : PageModel
         catch (Exception exception)
         {
             _logger.LogWarning(exception, "Passkey registration failed for user {UserId}.", user.Id);
-            return PasskeyError("The passkey could not be registered. Please try again.", StatusCodes.Status400BadRequest);
+            try
+            {
+                _db.ErrorLogs.Add(new InvoiceApp.Core.Entities.ErrorLog
+                {
+                    RequestPath = HttpContext.Request.Path,
+                    RequestId = HttpContext.TraceIdentifier,
+                    Message = $"Passkey registration failed: {exception.Message}",
+                    StackTrace = exception.StackTrace,
+                    InnerMessage = exception.InnerException?.Message
+                });
+                await _db.SaveChangesAsync(cancellationToken);
+            }
+            catch { /* never mask the original failure */ }
+            return PasskeyError($"The passkey could not be registered: {exception.Message}", StatusCodes.Status400BadRequest);
         }
     }
 
