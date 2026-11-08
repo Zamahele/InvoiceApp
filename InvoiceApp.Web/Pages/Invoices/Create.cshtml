@@ -11,7 +11,10 @@
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h5 class="fw-bold mb-0">@(Model.IsEditing ? "Edit Invoice" : "New Invoice")</h5>
+    <div>
+        <span class="page-eyebrow">Invoicing</span>
+        <h1 class="h4 fw-bold mb-0">@(Model.IsEditing ? "Edit Invoice" : "New Invoice")</h1>
+    </div>
     <a href="@(Model.IsEditing ? $"/Invoices/Preview?id={Model.Invoice.Id}" : "/")" class="btn btn-sm btn-outline-secondary" aria-label="Back">
         <i class="bi bi-arrow-left"></i>
     </a>

@@ -6,18 +6,14 @@
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <div>
-        <h5 class="fw-bold mb-1">Recurring Invoices</h5>
+        <span class="page-eyebrow">Invoicing</span>
+        <h1 class="h4 fw-bold mb-1">Recurring Invoices</h1>
         <p class="text-muted small mb-0">Create the same invoice monthly on the day you choose.</p>
     </div>
     <a href="/Invoices/History" class="btn btn-sm btn-outline-secondary" aria-label="Back to invoice history">
         <i class="bi bi-arrow-left"></i><span class="d-none d-sm-inline ms-1">History</span>
     </a>
 </div>
-
-@if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
-{
-    <div class="alert alert-success py-2">@Model.StatusMessage</div>
-}
 
 @if (!ViewData.ModelState.IsValid)
 {

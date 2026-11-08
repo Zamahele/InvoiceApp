@@ -14,10 +14,6 @@
     </a>
 </div>
 
-@if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
-{
-    <div class="alert alert-success py-2" role="status">@Model.StatusMessage</div>
-}
 
 @if (!Model.PasskeysAvailable)
 {

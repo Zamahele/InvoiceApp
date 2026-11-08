@@ -80,6 +80,9 @@ a { color: var(--navy); }
 a .kpi-card { transition: border-color .18s, box-shadow .18s, transform .18s; }
 a:hover .kpi-card { border-color: #b7c5d8; box-shadow: 0 10px 24px rgba(15, 52, 96, .1); transform: translateY(-2px); }
 
+/* Consistent page header */
+.page-eyebrow { color: var(--gold); display: block; font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+
 /* Toasts */
 .toast-success { background: #e7f2ec; color: #14532d; }
 .toast-error { background: #fbeaea; color: #7f1d1d; }

@@ -5,7 +5,10 @@
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h5 class="fw-bold mb-0">Settings</h5>
+    <div>
+        <span class="page-eyebrow">Account</span>
+        <h1 class="h4 fw-bold mb-0">Settings</h1>
+    </div>
     @if (Model.RentTrackingEnabled)
     {
         <a href="/Settings/Rooms" class="btn btn-outline-secondary btn-sm">
@@ -26,10 +29,6 @@
     </div>
 }
 
-@if (!string.IsNullOrEmpty(Model.StatusMessage))
-{
-    <div class="alert alert-success py-2">@Model.StatusMessage</div>
-}
 
 <form method="post" asp-page-handler="Services" class="mb-3" id="servicesForm">
     <div class="card">

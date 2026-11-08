@@ -5,7 +5,10 @@
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0"><i class="bi bi-house-door"></i> Manage Rooms</h4>
+    <div>
+        <span class="page-eyebrow">Rent tracking</span>
+        <h1 class="h4 fw-bold mb-0"><i class="bi bi-house-door"></i> Manage Rooms</h1>
+    </div>
     <div class="d-flex gap-2">
         <a href="#addRoom" class="btn btn-primary btn-sm d-md-none">
             <i class="bi bi-plus-lg"></i> Add room
@@ -29,13 +32,6 @@
     </div>
 }
 
-@if (TempData["StatusMessage"] is string msg)
-{
-    <div class="alert alert-success alert-dismissible fade show py-2" role="alert">
-        @msg
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
 
 @* ── PROPERTIES ── *@
 <div class="card mb-4">
