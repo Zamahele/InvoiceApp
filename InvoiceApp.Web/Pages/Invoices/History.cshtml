@@ -80,6 +80,18 @@ else
                         <div class="fw-semibold">@invoice.InvoiceNumber</div>
                         <div class="text-muted small">@invoice.ClientName</div>
                         <div class="text-muted small">@invoice.InvoiceDate.ToString("dd MMM yyyy")</div>
+                        @if (invoice.EmailStatus == "Sent")
+                        {
+                            <span class="badge bg-success-subtle text-success border border-success-subtle mt-1" title="Emailed @(invoice.EmailSentAt?.ToLocalTime().ToString("dd MMM yyyy HH:mm"))">
+                                <i class="bi bi-envelope-check"></i> Sent
+                            </span>
+                        }
+                        else if (invoice.EmailStatus == "Failed")
+                        {
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle mt-1" title="@invoice.EmailError">
+                                <i class="bi bi-envelope-x"></i> Failed
+                            </span>
+                        }
                     </div>
                     <div class="col-12 col-md-3">
                         <div class="fw-bold text-primary mt-2 mt-md-0">R @invoice.TotalAmount.ToString("N2")</div>

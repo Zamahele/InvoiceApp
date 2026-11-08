@@ -41,5 +41,10 @@ public class Invoice : ITenantOwned
     public string? Notes { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.Now;
 
+    // Email delivery tracking
+    public string EmailStatus { get; set; } = "Pending"; // Pending, Sent, Failed
+    public DateTime? EmailSentAt { get; set; }
+    public string? EmailError { get; set; }
+
     public List<LineItem> LineItems { get; set; } = new();
 }

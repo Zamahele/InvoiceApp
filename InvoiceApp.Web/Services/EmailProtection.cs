@@ -6,5 +6,5 @@ namespace InvoiceApp.Web.Pages.Settings;
 /// </summary>
 public static class EmailProtection
 {
-    public const string Purpose = "InvoiceApp.EmailSettings.Password.v1";
+    public const string Purpose = InvoiceApp.Infrastructure.Services.EmailProtection.Purpose;
 }

@@ -1,8 +1,6 @@
 using InvoiceApp.Core.Entities;
 using InvoiceApp.Infrastructure.Data;
 using InvoiceApp.Infrastructure.Services;
-using InvoiceApp.Web.Pages.Settings;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -12,20 +10,12 @@ namespace InvoiceApp.Web.Pages.Invoices;
 public class PreviewModel : PageModel
 {
     private readonly AppDbContext _db;
-    private readonly InvoicePdfService _pdf;
-    private readonly IEmailService _email;
-    private readonly IDataProtector _protector;
+    private readonly InvoiceEmailSender _emailSender;
 
-    public PreviewModel(
-        AppDbContext db,
-        InvoicePdfService pdf,
-        IEmailService email,
-        IDataProtectionProvider dataProtection)
+    public PreviewModel(AppDbContext db, InvoiceEmailSender emailSender)
     {
         _db = db;
-        _pdf = pdf;
-        _email = email;
-        _protector = dataProtection.CreateProtector(EmailProtection.Purpose);
+        _emailSender = emailSender;
     }
 
     public Invoice? Invoice { get; set; }
@@ -60,55 +50,15 @@ public class PreviewModel : PageModel
 
         if (invoice == null) return NotFound();
 
-        if (string.IsNullOrWhiteSpace(invoice.ClientEmail))
-            return Fail(id, "This invoice has no client email. Edit the invoice to add one.");
-
-        var settings = await _db.EmailSettings.FirstOrDefaultAsync();
-        if (settings == null || string.IsNullOrEmpty(settings.SmtpHost))
-            return Fail(id, "Email is not configured. Set it up under Settings → Email.");
-
-        var company = await _db.CompanySettings.FirstOrDefaultAsync();
-        var banking = await _db.BankingDetails.FirstOrDefaultAsync();
-
-        string password;
-        try
+        var sent = await _emailSender.SendAsync(invoice);
+        if (sent)
         {
-            password = _protector.Unprotect(settings.Password);
-        }
-        catch
-        {
-            return Fail(id, "Could not read the saved email password. Re-enter it under Settings → Email.");
-        }
-
-        try
-        {
-            var pdf = _pdf.Generate(invoice, company, banking);
-            var companyName = company?.Name ?? settings.FromName;
-            var emailContent = InvoiceEmailComposer.Compose(
-                invoice,
-                company,
-                string.IsNullOrWhiteSpace(settings.FromName) ? companyName : settings.FromName);
-
-            await _email.SendInvoiceAsync(new EmailSendRequest(
-                SmtpHost: settings.SmtpHost,
-                SmtpPort: settings.SmtpPort,
-                UseSsl: settings.UseSsl,
-                Username: settings.Username,
-                Password: password,
-                FromName: string.IsNullOrWhiteSpace(settings.FromName) ? companyName : settings.FromName,
-                FromEmail: settings.FromEmail,
-                ToEmail: invoice.ClientEmail!,
-                Subject: emailContent.Subject,
-                Body: emailContent.Body,
-                PdfBytes: pdf,
-                PdfFileName: emailContent.PdfFileName));
-
             StatusMessage = $"Invoice emailed to {invoice.ClientEmail}.";
             StatusIsError = false;
         }
-        catch (Exception ex)
+        else
         {
-            return Fail(id, $"Sending failed: {ex.Message}");
+            return Fail(id, $"Sending failed: {invoice.EmailError}");
         }
 
         return RedirectToPage(new { id });

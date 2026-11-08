@@ -7,8 +7,13 @@ namespace InvoiceApp.Infrastructure.Services;
 public class RecurringInvoiceService
 {
     private readonly AppDbContext _db;
+    private readonly InvoiceEmailSender? _emailSender;
 
-    public RecurringInvoiceService(AppDbContext db) => _db = db;
+    public RecurringInvoiceService(AppDbContext db, InvoiceEmailSender? emailSender = null)
+    {
+        _db = db;
+        _emailSender = emailSender;
+    }
 
     public async Task<int> GenerateDueInvoicesAsync(DateTime? today = null, CancellationToken cancellationToken = default)
     {
@@ -36,6 +41,9 @@ public class RecurringInvoiceService
                     _db.Invoices.Add(invoice);
                     await _db.SaveChangesAsync(cancellationToken);
                     generatedCount++;
+
+                    if (_emailSender != null)
+                        await _emailSender.SendAsync(invoice, cancellationToken);
                 }
 
                 schedule.NextRunDate = GetNextRunDate(scheduledDate, schedule.DueDay);

@@ -87,6 +87,7 @@ builder.Services.AddScoped<InvoiceApp.Infrastructure.Services.RecurringInvoiceSe
 builder.Services.AddHostedService<RecurringInvoiceWorker>();
 builder.Services.AddScoped<InvoiceApp.Infrastructure.Services.RentReceiptPdfService>();
 builder.Services.AddScoped<InvoiceApp.Infrastructure.Services.IEmailService, InvoiceApp.Infrastructure.Services.EmailService>();
+builder.Services.AddScoped<InvoiceApp.Infrastructure.Services.InvoiceEmailSender>();
 
 builder.Services.AddRazorPages(options =>
 {
