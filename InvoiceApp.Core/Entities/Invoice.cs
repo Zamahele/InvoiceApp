@@ -41,8 +41,8 @@ public class Invoice : ITenantOwned
     public string? Notes { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-    // Email delivery tracking
-    public string EmailStatus { get; set; } = "Pending"; // Pending, Sent, Failed
+    // Email delivery tracking. Null/empty = never sent (no badge shown).
+    public string? EmailStatus { get; set; } // null, Sent, Failed
     public DateTime? EmailSentAt { get; set; }
     public string? EmailError { get; set; }
 

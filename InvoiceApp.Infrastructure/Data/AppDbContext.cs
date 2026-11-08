@@ -137,7 +137,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>, IDataProtectionK
         modelBuilder.Entity<Invoice>()
             .Property(i => i.TotalAmount).HasColumnType("decimal(18,2)");
         modelBuilder.Entity<Invoice>()
-            .Property(i => i.EmailStatus).HasMaxLength(20).HasDefaultValue("Pending");
+            .Property(i => i.EmailStatus).HasMaxLength(20);
         modelBuilder.Entity<Invoice>()
             .Property(i => i.EmailError).HasMaxLength(1000);
         modelBuilder.Entity<LineItem>()
