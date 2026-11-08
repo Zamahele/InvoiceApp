@@ -112,7 +112,7 @@ else
                             </a>
                             <form method="post" asp-page-handler="Delete" asp-route-id="@invoice.Id" style="display:inline">
                                 <button class="btn btn-sm btn-outline-danger"
-                                        onclick="return confirm('Delete @invoice.InvoiceNumber?')">
+                                        data-confirm="Delete invoice @invoice.InvoiceNumber? This cannot be undone.">
                                     <i class="bi bi-trash"></i><span class="ms-2 d-md-none">Delete</span>
                                 </button>
                             </form>

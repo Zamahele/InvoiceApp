@@ -2,42 +2,125 @@
 @model IndexModel
 @{
     ViewData["Title"] = "Dashboard";
+    var monthName = DateTime.Now.ToString("MMMM yyyy");
 }
 
-<div class="row g-3 mt-1">
-    <div class="col-12">
-        <h4 class="fw-bold">Dashboard</h4>
-        @if (!string.IsNullOrEmpty(Model.CompanyName))
-        {
-            <p class="text-muted mb-0">@Model.CompanyName</p>
-        }
+<div class="d-flex justify-content-between align-items-center mb-1">
+    <div>
+        <span class="page-eyebrow">Overview</span>
+        <h1 class="h4 fw-bold mb-0">Dashboard</h1>
     </div>
+</div>
+@if (!string.IsNullOrEmpty(Model.CompanyName))
+{
+    <p class="text-muted mb-3">@Model.CompanyName</p>
+}
 
-    @if (!Model.InvoicingEnabled && !Model.RentTrackingEnabled)
-    {
-        <div class="col-12">
-            <div class="alert alert-info mb-0">
-                No services enabled yet. Turn on Invoicing or Rent tracking in
-                <a href="/Settings" class="alert-link">Settings</a>.
+@if (!Model.InvoicingEnabled && !Model.RentTrackingEnabled)
+{
+    <div class="alert alert-info">
+        No services enabled yet. Turn on Invoicing or Rent tracking in
+        <a href="/Settings" class="alert-link">Settings</a>.
+    </div>
+}
+
+@if (Model.InvoicingEnabled)
+{
+    <p class="text-muted small mb-2 fw-semibold text-uppercase">Invoicing · @monthName</p>
+    <div class="row g-3 mb-2">
+        <div class="col-6 col-lg-3">
+            <div class="card kpi-card h-100">
+                <div class="card-body">
+                    <div class="kpi-icon kpi-revenue"><i class="bi bi-cash-stack"></i></div>
+                    <div class="kpi-value">R @Model.RevenueThisMonth.ToString("N2")</div>
+                    <div class="kpi-label">Invoiced this month</div>
+                </div>
             </div>
         </div>
-    }
-
-    @if (Model.InvoicingEnabled)
-    {
-        <div class="col-12">
-            <p class="text-muted small mb-1 fw-semibold text-uppercase">Invoicing</p>
+        <div class="col-6 col-lg-3">
+            <div class="card kpi-card h-100">
+                <div class="card-body">
+                    <div class="kpi-icon kpi-count"><i class="bi bi-file-text"></i></div>
+                    <div class="kpi-value">@Model.TotalInvoices</div>
+                    <div class="kpi-label">Total invoices</div>
+                </div>
+            </div>
         </div>
-        <div class="col-6">
-            <a href="/Invoices/Create" class="text-decoration-none">
-                <div class="card text-center border-primary h-100">
-                    <div class="card-body py-4">
-                        <i class="bi bi-plus-circle fs-1 text-primary"></i>
-                        <p class="mt-2 fw-semibold mb-0">New Invoice</p>
+        <div class="col-6 col-lg-3">
+            <a href="/Invoices/History" class="text-decoration-none">
+                <div class="card kpi-card h-100">
+                    <div class="card-body">
+                        <div class="kpi-icon kpi-unsent"><i class="bi bi-envelope"></i></div>
+                        <div class="kpi-value">@Model.UnsentInvoices</div>
+                        <div class="kpi-label">Awaiting send</div>
                     </div>
                 </div>
             </a>
         </div>
+        <div class="col-6 col-lg-3">
+            <a href="/Invoices/Create" class="text-decoration-none">
+                <div class="card kpi-card kpi-action h-100">
+                    <div class="card-body">
+                        <div class="kpi-icon kpi-new"><i class="bi bi-plus-circle"></i></div>
+                        <div class="kpi-label fw-semibold">New invoice</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+}
+
+@if (Model.RentTrackingEnabled)
+{
+    <p class="text-muted small mb-2 mt-3 fw-semibold text-uppercase">Rent · @monthName</p>
+    <div class="row g-3 mb-2">
+        <div class="col-6 col-lg-3">
+            <div class="card kpi-card h-100">
+                <div class="card-body">
+                    <div class="kpi-icon kpi-collected"><i class="bi bi-check-circle"></i></div>
+                    <div class="kpi-value">R @Model.RentCollected.ToString("N2")</div>
+                    <div class="kpi-label">Collected</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card kpi-card h-100">
+                <div class="card-body">
+                    <div class="kpi-icon kpi-due"><i class="bi bi-hourglass-split"></i></div>
+                    <div class="kpi-value">R @Model.RentDue.ToString("N2")</div>
+                    <div class="kpi-label">Total due</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <a href="/Rent" class="text-decoration-none">
+                <div class="card kpi-card h-100">
+                    <div class="card-body">
+                        <div class="kpi-icon kpi-paid"><i class="bi bi-house-check"></i></div>
+                        <div class="kpi-value">@Model.RentPaidCount<span class="kpi-sub">/@(Model.RentPaidCount + Model.RentOutstandingCount)</span></div>
+                        <div class="kpi-label">Rooms paid</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-lg-3">
+            <a href="/Rent" class="text-decoration-none">
+                <div class="card kpi-card h-100">
+                    <div class="card-body">
+                        <div class="kpi-icon kpi-outstanding"><i class="bi bi-exclamation-circle"></i></div>
+                        <div class="kpi-value">@Model.RentOutstandingCount</div>
+                        <div class="kpi-label">Outstanding</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+}
+
+<p class="text-muted small mb-2 mt-3 fw-semibold text-uppercase">Quick actions</p>
+<div class="row g-3">
+    @if (Model.InvoicingEnabled)
+    {
         <div class="col-6">
             <a href="/Invoices/History" class="text-decoration-none">
                 <div class="card text-center border-secondary h-100">
@@ -49,22 +132,8 @@
             </a>
         </div>
     }
-
     @if (Model.RentTrackingEnabled)
     {
-        <div class="col-12 mt-2">
-            <p class="text-muted small mb-1 fw-semibold text-uppercase">Rent Tracking</p>
-        </div>
-        <div class="col-6">
-            <a href="/Rent" class="text-decoration-none">
-                <div class="card text-center border-success h-100">
-                    <div class="card-body py-4">
-                        <i class="bi bi-house-door fs-1 text-success"></i>
-                        <p class="mt-2 fw-semibold mb-0">Rent Tracker</p>
-                    </div>
-                </div>
-            </a>
-        </div>
         <div class="col-6">
             <a href="/Settings/Rooms" class="text-decoration-none">
                 <div class="card text-center border-info h-100">
@@ -76,10 +145,6 @@
             </a>
         </div>
     }
-
-    <div class="col-12 mt-2">
-        <p class="text-muted small mb-1 fw-semibold text-uppercase">Settings</p>
-    </div>
     <div class="col-6">
         <a href="/Settings" class="text-decoration-none">
             <div class="card text-center border-warning h-100">

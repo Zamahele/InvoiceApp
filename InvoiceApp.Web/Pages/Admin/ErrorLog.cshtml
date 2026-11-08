@@ -59,7 +59,7 @@ else
                     </div>
                     <form method="post" asp-page-handler="Delete" asp-route-id="@error.Id" style="flex-shrink:0">
                         <button class="btn btn-sm btn-outline-danger"
-                                onclick="return confirm('Delete this entry?')">
+                                data-confirm="Delete this entry?">
                             <i class="bi bi-trash"></i>
                         </button>
                     </form>

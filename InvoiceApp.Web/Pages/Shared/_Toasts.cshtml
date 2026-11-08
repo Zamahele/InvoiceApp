@@ -1,0 +1,20 @@
+@* Global toast notifications. Reads TempData StatusMessage / StatusIsError and
+   renders a Bootstrap toast that auto-shows and auto-dismisses. *@
+@{
+    var toastMessage = TempData["StatusMessage"] as string;
+    var toastIsError = TempData["StatusIsError"] as bool? == true;
+}
+<div class="toast-container position-fixed top-0 end-0 p-3" id="toastContainer" aria-live="polite" aria-atomic="true">
+    @if (!string.IsNullOrWhiteSpace(toastMessage))
+    {
+        <div class="toast align-items-center border-0 shadow @(toastIsError ? "toast-error" : "toast-success")"
+             role="status" data-bs-autohide="true" data-bs-delay="4500" data-toast-autoshow="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi @(toastIsError ? "bi-exclamation-circle" : "bi-check-circle") me-2"></i>@toastMessage
+                </div>
+                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    }
+</div>

@@ -65,7 +65,7 @@
                         <small class="text-muted">R @(rate.Rate.ToString("N2")) / @rate.Unit</small>
                     </div>
                     <form method="post" asp-page-handler="Delete" asp-route-id="@rate.Id">
-                        <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this rate?')">
+                        <button class="btn btn-sm btn-outline-danger" data-confirm="Delete this rate?">
                             <i class="bi bi-trash"></i>
                         </button>
                     </form>

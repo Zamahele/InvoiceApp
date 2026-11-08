@@ -62,6 +62,29 @@ a { color: var(--navy); }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; box-shadow: var(--shadow-soft); overflow: hidden; }
 .login-divider { align-items: center; color: var(--muted); display: flex; font-size: .82rem; gap: .75rem; margin: 1rem 0; text-transform: uppercase; letter-spacing: .06em; }
 .login-divider::before, .login-divider::after { background: var(--line); content: ""; flex: 1; height: 1px; }
+
+/* Dashboard KPI cards */
+.kpi-card .card-body { align-items: flex-start; display: flex; flex-direction: column; gap: .35rem; padding: 1rem 1.1rem; }
+.kpi-icon { align-items: center; border-radius: 8px; display: inline-flex; font-size: 1.25rem; height: 42px; justify-content: center; width: 42px; }
+.kpi-value { color: var(--navy-dark); font-size: 1.35rem; font-weight: 700; line-height: 1.1; }
+.kpi-sub { color: var(--muted); font-size: .95rem; font-weight: 600; }
+.kpi-label { color: var(--muted); font-size: .82rem; font-weight: 600; }
+.kpi-revenue { background: #e7f2ec; color: #1c7a4d; }
+.kpi-count { background: #eaf0f7; color: var(--navy); }
+.kpi-unsent { background: #fdf3e3; color: #b8933e; }
+.kpi-new { background: var(--navy); color: #fff; }
+.kpi-collected { background: #e7f2ec; color: #1c7a4d; }
+.kpi-due { background: #eaf0f7; color: var(--navy); }
+.kpi-paid { background: #e7f2ec; color: #1c7a4d; }
+.kpi-outstanding { background: #fbeaea; color: #b03a3a; }
+a .kpi-card { transition: border-color .18s, box-shadow .18s, transform .18s; }
+a:hover .kpi-card { border-color: #b7c5d8; box-shadow: 0 10px 24px rgba(15, 52, 96, .1); transform: translateY(-2px); }
+
+/* Toasts */
+.toast-success { background: #e7f2ec; color: #14532d; }
+.toast-error { background: #fbeaea; color: #7f1d1d; }
+.toast { border-radius: 8px; }
+#toastContainer { z-index: 1080; }
 .card-header { background: linear-gradient(100deg, var(--navy) 0%, #174775 100%); border-bottom: 0; color: #fff; font-weight: 600; letter-spacing: .01em; padding: .82rem 1rem; }
 .card-header.bg-dark { background: var(--navy) !important; }
 .card-body { padding: 1.15rem; }
