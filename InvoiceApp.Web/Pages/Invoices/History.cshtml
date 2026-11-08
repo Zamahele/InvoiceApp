@@ -77,7 +77,21 @@ else
             <div class="card-body py-3 px-3">
                 <div class="row align-items-start">
                     <div class="col-12 col-md-5">
-                        <div class="fw-semibold">@invoice.InvoiceNumber</div>
+                        <div class="fw-semibold">
+                            @invoice.InvoiceNumber
+                            @if (invoice.RecurringScheduleId.HasValue)
+                            {
+                                <span class="badge bg-info-subtle text-info border border-info-subtle ms-1" title="Generated automatically by a recurring schedule">
+                                    <i class="bi bi-arrow-repeat"></i> Auto
+                                </span>
+                            }
+                            else if (Model.SourceInvoiceIdsWithSchedule.Contains(invoice.Id))
+                            {
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-1" title="This invoice repeats monthly">
+                                    <i class="bi bi-arrow-repeat"></i> Recurring
+                                </span>
+                            }
+                        </div>
                         <div class="text-muted small">@invoice.ClientName</div>
                         <div class="text-muted small">@invoice.InvoiceDate.ToString("dd MMM yyyy")</div>
                         @if (invoice.EmailStatus == "Sent")

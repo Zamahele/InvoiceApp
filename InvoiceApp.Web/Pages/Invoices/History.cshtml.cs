@@ -20,6 +20,7 @@ public class HistoryModel : PageModel
     }
 
     public List<Invoice> Invoices { get; set; } = new();
+    public HashSet<int> SourceInvoiceIdsWithSchedule { get; private set; } = new();
     public int CurrentPage { get; set; } = 1;
     public int TotalPages { get; set; } = 1;
     public int RecurringInvoicesGenerated { get; set; }
@@ -74,6 +75,14 @@ public class HistoryModel : PageModel
             .Skip((CurrentPage - 1) * PageSize)
             .Take(PageSize)
             .ToListAsync();
+
+        // Which of these source invoices have a recurring schedule attached.
+        var pageIds = Invoices.Select(i => i.Id).ToList();
+        SourceInvoiceIdsWithSchedule = (await _db.RecurringInvoiceSchedules
+            .Where(s => pageIds.Contains(s.SourceInvoiceId))
+            .Select(s => s.SourceInvoiceId)
+            .ToListAsync())
+            .ToHashSet();
     }
 
     public async Task<IActionResult> OnPostDeleteAsync(int id)
