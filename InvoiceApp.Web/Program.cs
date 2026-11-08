@@ -89,6 +89,12 @@ builder.Services.AddScoped<InvoiceApp.Infrastructure.Services.RentReceiptPdfServ
 builder.Services.AddScoped<InvoiceApp.Infrastructure.Services.IEmailService, InvoiceApp.Infrastructure.Services.EmailService>();
 builder.Services.AddScoped<InvoiceApp.Infrastructure.Services.InvoiceEmailSender>();
 
+// Persist Error/Critical log events to the ErrorLogs table for visibility at /Admin/ErrorLog.
+builder.Services.AddSingleton<ILoggerProvider>(sp =>
+    new DatabaseLoggerProvider(
+        sp.GetRequiredService<IServiceScopeFactory>(),
+        sp.GetRequiredService<IHttpContextAccessor>()));
+
 builder.Services.AddRazorPages(options =>
 {
     // Everything requires a signed-in company except the auth + error pages.

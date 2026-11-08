@@ -24,6 +24,9 @@ public class IndexModel : PageModel
     public bool InvoicingEnabled { get; set; }
     public bool RentTrackingEnabled { get; set; }
 
+    // Recent error count for the admin Error Log link badge.
+    public int ErrorCount { get; private set; }
+
     [TempData]
     public string? StatusMessage { get; set; }
 
@@ -35,6 +38,8 @@ public class IndexModel : PageModel
         var tenant = await GetTenantAsync();
         InvoicingEnabled = tenant?.InvoicingEnabled ?? false;
         RentTrackingEnabled = tenant?.RentTrackingEnabled ?? false;
+
+        ErrorCount = await _db.ErrorLogs.CountAsync();
     }
 
     public async Task<IActionResult> OnPostServicesAsync(bool enableInvoicing, bool enableRentTracking)

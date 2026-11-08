@@ -70,6 +70,16 @@
             <span><i class="bi bi-fingerprint"></i> Passkeys</span>
             <i class="bi bi-chevron-right text-muted"></i>
         </a>
+        <a href="/Admin/ErrorLog" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+            <span>
+                <i class="bi bi-journal-text"></i> Error Log
+                @if (Model.ErrorCount > 0)
+                {
+                    <span class="badge bg-danger ms-1">@Model.ErrorCount</span>
+                }
+            </span>
+            <i class="bi bi-chevron-right text-muted"></i>
+        </a>
     </div>
 </div>
 
