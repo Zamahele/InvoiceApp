@@ -60,6 +60,8 @@ a { color: var(--navy); }
 .btn-outline-primary:hover { background: var(--navy); border-color: var(--navy); color: #fff; }
 
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; box-shadow: var(--shadow-soft); overflow: hidden; }
+.login-divider { align-items: center; color: var(--muted); display: flex; font-size: .82rem; gap: .75rem; margin: 1rem 0; text-transform: uppercase; letter-spacing: .06em; }
+.login-divider::before, .login-divider::after { background: var(--line); content: ""; flex: 1; height: 1px; }
 .card-header { background: linear-gradient(100deg, var(--navy) 0%, #174775 100%); border-bottom: 0; color: #fff; font-weight: 600; letter-spacing: .01em; padding: .82rem 1rem; }
 .card-header.bg-dark { background: var(--navy) !important; }
 .card-body { padding: 1.15rem; }

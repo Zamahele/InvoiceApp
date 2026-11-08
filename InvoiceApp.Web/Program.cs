@@ -42,12 +42,14 @@ builder.Services.AddSession(options =>
     options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
 });
 
+// RpId must be the registrable domain (or a suffix match of the origin host) so the
+// browser accepts the ceremony on both the apex domain and the blacktech subdomain.
 var passkeyRpId = builder.Configuration["Passkeys:RpId"]
-    ?? (builder.Environment.IsDevelopment() ? "localhost" : "blacktech.gcweproperty.co.za");
+    ?? (builder.Environment.IsDevelopment() ? "localhost" : "gcweproperty.co.za");
 var passkeyOrigins = builder.Configuration.GetSection("Passkeys:Origins").Get<string[]>()
     ?? (builder.Environment.IsDevelopment()
         ? new[] { "http://localhost:5000", "https://localhost:5001" }
-        : new[] { "https://blacktech.gcweproperty.co.za" });
+        : new[] { "https://gcweproperty.co.za", "https://blacktech.gcweproperty.co.za" });
 
 builder.Services.AddFido2(options =>
 {
