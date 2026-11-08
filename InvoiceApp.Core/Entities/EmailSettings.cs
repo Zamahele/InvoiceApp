@@ -23,4 +23,7 @@ public class EmailSettings : ITenantOwned
 
     public string FromName { get; set; } = string.Empty;
     public string FromEmail { get; set; } = string.Empty;
+
+    /// <summary>Optional address that receives a copy of every invoice email (audit).</summary>
+    public string? CcEmail { get; set; }
 }

@@ -79,7 +79,8 @@ public class InvoiceEmailSender
                 Subject: content.Subject,
                 Body: content.Body,
                 PdfBytes: pdf,
-                PdfFileName: content.PdfFileName), cancellationToken);
+                PdfFileName: content.PdfFileName,
+                CcEmail: settings.CcEmail), cancellationToken);
 
             invoice.EmailStatus = "Sent";
             invoice.EmailSentAt = DateTime.UtcNow;

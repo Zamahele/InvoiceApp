@@ -73,6 +73,11 @@
                 <label class="form-label">From Email</label>
                 <input asp-for="Input.FromEmail" type="email" class="form-control" placeholder="e.g. accounts@yourdomain.co.za" />
             </div>
+            <div class="mb-2">
+                <label class="form-label">CC Email <span class="text-muted fw-normal">(optional)</span></label>
+                <input asp-for="Input.CcEmail" type="email" class="form-control" placeholder="e.g. you@yourdomain.co.za" />
+                <div class="form-text">Receives a copy of every invoice email for your records.</div>
+            </div>
         </div>
     </div>
 

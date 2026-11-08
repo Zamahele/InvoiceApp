@@ -19,7 +19,8 @@ public record EmailSendRequest(
     string Subject,
     string Body,
     byte[] PdfBytes,
-    string PdfFileName);
+    string PdfFileName,
+    string? CcEmail = null);
 
 public sealed record InvoiceEmailContent(string Subject, string Body, string PdfFileName);
 
@@ -68,6 +69,8 @@ public class EmailService : IEmailService
             string.IsNullOrWhiteSpace(request.FromName) ? request.FromEmail : request.FromName,
             request.FromEmail));
         message.To.Add(MailboxAddress.Parse(request.ToEmail));
+        if (!string.IsNullOrWhiteSpace(request.CcEmail))
+            message.Cc.Add(MailboxAddress.Parse(request.CcEmail));
         message.Subject = request.Subject;
 
         var builder = new BodyBuilder { TextBody = request.Body };

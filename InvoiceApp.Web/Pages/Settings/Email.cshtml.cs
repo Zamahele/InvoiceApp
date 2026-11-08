@@ -52,6 +52,9 @@ public class EmailModel : PageModel
 
         [Required, Display(Name = "From name")]
         public string FromName { get; set; } = string.Empty;
+
+        [EmailAddress, Display(Name = "CC email (audit copy)")]
+        public string? CcEmail { get; set; }
     }
 
     public async Task OnGetAsync()
@@ -65,6 +68,7 @@ public class EmailModel : PageModel
             Input.Username = s.Username;
             Input.FromEmail = s.FromEmail;
             Input.FromName = s.FromName;
+            Input.CcEmail = s.CcEmail;
             HasStoredPassword = HasReadablePassword(s.Password);
         }
     }
@@ -88,6 +92,7 @@ public class EmailModel : PageModel
         entity.Username = Input.Username.Trim();
         entity.FromEmail = Input.FromEmail.Trim();
         entity.FromName = Input.FromName.Trim();
+        entity.CcEmail = string.IsNullOrWhiteSpace(Input.CcEmail) ? null : Input.CcEmail.Trim();
 
         // Encrypt at rest; only replace the stored password when a new one is entered.
         if (!string.IsNullOrWhiteSpace(Input.Password))
