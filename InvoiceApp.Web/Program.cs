@@ -49,7 +49,7 @@ var passkeyRpId = builder.Configuration["Passkeys:RpId"]
 var passkeyOrigins = builder.Configuration.GetSection("Passkeys:Origins").Get<string[]>()
     ?? (builder.Environment.IsDevelopment()
         ? new[] { "http://localhost:5000", "https://localhost:5001" }
-        : new[] { "https://gcweproperty.co.za", "https://blacktech.gcweproperty.co.za" });
+        : new[] { "https://gcweproperty.co.za", "https://www.gcweproperty.co.za", "https://blacktech.gcweproperty.co.za" });
 
 builder.Services.AddFido2(options =>
 {
